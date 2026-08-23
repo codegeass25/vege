@@ -1,4 +1,4 @@
-const CACHE='farm-finance-v3';
+const CACHE='farm-finance-v4';
 const BASE=new URL('./',self.location.href);
 const APP_SHELL=[new URL('./',BASE).href,new URL('./manifest.webmanifest',BASE).href,new URL('./icons/icon-192.png',BASE).href,new URL('./icons/icon-512.png',BASE).href];
 self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(APP_SHELL)).then(()=>self.skipWaiting())));
