@@ -25,7 +25,8 @@
 'use strict';
 const state={token:localStorage.getItem('wi_token')||'',user:JSON.parse(localStorage.getItem('wi_user')||'null'),deviceId:localStorage.getItem('wi_device')||crypto.randomUUID(),page:'dashboard',search:'',online:false,pending:0,lastSync:localStorage.getItem('wi_lastSync')||'1970-01-01T00:00:00.000Z',cache:{},modal:null};
 localStorage.setItem('wi_device',state.deviceId);
-const apiBase=localStorage.getItem('wi_api') || (location.protocol==='file:'?'http://localhost:4545':location.origin.replace(/\/$/,''));
+const DEFAULT_API_BASE='https://vege.mdmsportal.uk';
+const apiBase=(localStorage.getItem('wi_api') || DEFAULT_API_BASE).replace(/\/$/,'');
 const root=document.getElementById('root');
 const toastHost=document.getElementById('toastHost');
 function toast(msg,error=false){const e=document.createElement('div');e.className='toast'+(error?' error':'');e.textContent=msg;toastHost.innerHTML='';toastHost.appendChild(e);setTimeout(()=>e.remove(),3800)}
