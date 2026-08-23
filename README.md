@@ -1,19 +1,18 @@
-# Farm & Trading Financial PWA — GitHub Frontend
+# VEGE v3 GitHub Pages frontend
 
-Deploy this folder as the GitHub Pages frontend.
+Deploy this folder's contents to the GitHub Pages repository for `/vege/`.
 
-Backend Cloudflare Tunnel hostname:
-`https://vege.mdmsportal.uk`
+The UI is responsive for desktop/tablet/mobile, uses relative PWA paths, and calls the backend at `https://vege.mdmsportal.uk` by default.
 
-Frontend API base is intentionally:
-`https://vege.mdmsportal.uk`
+Optional API override:
+```html
+<script>window.VEGE_API_BASE='https://your-api.example.com'</script>
+```
 
-The frontend already appends `/api/...` for backend calls, resulting in endpoints such as:
-- https://vege.mdmsportal.uk/api/products
-- https://vege.mdmsportal.uk/api/cash
-- https://vege.mdmsportal.uk/api/sales
-- https://vege.mdmsportal.uk/api/reports
-
-Do not add `/api` to the Cloudflare tunnel hostname.
-
-Backend CORS must allow your GitHub Pages origin.
+The page exposes:
+- KPI cards and executive dashboard
+- Clickable datasets with detail drawers
+- Print + CSV download buttons for lists
+- Preview modes for financial reports
+- Mobile/tablet bottom navigation
+- Realtime synchronization through the backend event stream
