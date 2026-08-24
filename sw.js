@@ -1,4 +1,4 @@
-const CACHE='whitelabel-pwa-v5-5-1';
+const CACHE='whitelabel-pwa-v5-6-0';
 const APP_SHELL=['./','./index.html'];
 const isDynamicBranding=(url)=>url.pathname.startsWith('/api/')||url.pathname.startsWith('/branding/')||url.pathname.endsWith('/manifest.webmanifest');
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(APP_SHELL)).then(()=>self.skipWaiting())));
