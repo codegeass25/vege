@@ -168,7 +168,40 @@ async function openTransaction(kind,id){try{$('transactionModal').classList.add(
   $('transactionBody').innerHTML=html;
 }catch(e){$('transactionBody').innerHTML=`<div class="notice bad">${esc(e.message)}</div>`}}
 
-function downloadPath(p){location=API+apiPath(p)}
+async function downloadPath(p){
+  try{
+    const headers={'Accept':'application/octet-stream','X-VEGE-Client':'owner-pwa'};
+    const t=token();
+    if(t) headers.Authorization='Bearer '+t;
+    const r=await fetch(API+apiPath(p),{headers});
+    if(r.status===401){
+      localStorage.removeItem('vege_owner_token');
+      showAuth();
+      throw Error('Owner login required.');
+    }
+    if(!r.ok){
+      const ct=r.headers.get('content-type')||'';
+      let msg=`HTTP ${r.status}`;
+      try{
+        if(ct.includes('json')){const j=await r.json();msg=j?.error?.message||msg;}
+        else{const txt=await r.text();if(txt)msg=txt;}
+      }catch{}
+      throw Error(msg);
+    }
+    const blob=await r.blob();
+    const cd=r.headers.get('content-disposition')||'';
+    const match=cd.match(/filename[^;=]*=(?:UTF-8''|\")?([^;\"]+)/i);
+    const filename=match?decodeURIComponent(match[1].replace(/^\"|\"$/g,'')):((p.split('/').pop()||'download')+'.xlsx');
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url;
+    a.download=filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),1000);
+  }catch(e){showToast(e.message||'Download failed.',true)}
+}
 function downloadReport(){location=`${API}/api/reports/excel?from=${encodeURIComponent($('fromDate').value)}&to=${encodeURIComponent($('toDate').value)}&token=${encodeURIComponent(token())}`}
 function connectRealtime(){if(!('EventSource' in window))return;const es=new EventSource(`${API}${apiPath('/events')}?token=${encodeURIComponent(token())}`);es.addEventListener('ready',()=>setSync('Realtime connected'));es.addEventListener('data-change',()=>load());es.onerror=()=>setSync('Reconnecting…',true);window.addEventListener('beforeunload',()=>es.close())}
 loadPublicBranding();boot();if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js',{scope:'./'}).catch(console.error));
