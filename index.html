@@ -10,11 +10,13 @@
 <meta name="apple-mobile-web-app-title" content="Business Manager">
 <link id="appManifest" rel="manifest">
 <title>Business Manager</title>
+<link rel="apple-touch-icon" href="./icons/icon-192.png">
 <script>
 (()=>{
-  const apiBase=(window.VEGE_API_BASE||(location.hostname.endsWith('github.io')?'https://vege.mdmsportal.uk':location.origin)).replace(/\/$/,'');
+  // The manifest is always loaded same-origin and root-scoped so that the
+  // current page is inside the manifest scope on every platform.
   const link=document.getElementById('appManifest');
-  if(link) link.href=apiBase+'/api/manifest.webmanifest';
+  if(link) link.href='./manifest.webmanifest';
 })();
 </script>
 <style>
@@ -24,6 +26,7 @@
 </head>
 <body>
 <div id="brandSplash" class="brandSplash"><div class="brandSplashBox"><img id="splashLogo" alt="Company logo"><div id="splashTitle" class="brandSplashTitle">Loading…</div><div class="muted" style="margin-top:6px">Loading system…</div></div></div><div id="auth" class="auth"><form class="authbox" onsubmit="return doLogin(event)"><img id="loginLogo" alt="Company logo" style="display:none;width:70px;height:70px;object-fit:contain;border-radius:14px;margin-bottom:12px"><h2 id="loginTitle" style="margin-top:0">Owner Login</h2><p id="loginTagline" class="muted">Please sign in to continue.</p><div class="field"><label>Owner Password</label><input id="loginPassword" type="password" autocomplete="current-password" required></div><button class="primary" style="width:100%;margin-top:14px">Sign In</button><button id="authInstallAppBtn" type="button" class="secondary hidden" style="width:100%;margin-top:8px" onclick="installPwa()">Install App</button><div id="installHelp" class="muted hidden" style="margin-top:8px;line-height:1.45"></div><div id="loginError" class="notice bad hidden" style="margin-top:12px"></div></form></div>
+<div id="installGuide" class="modal" onclick="if(event.target===this)closeInstallGuide()"><div class="modalbox sm"><div class="modalHead"><h3 id="installGuideTitle" style="margin:0">Install App</h3><button class="close" type="button" onclick="closeInstallGuide()">Close</button></div><ol id="installGuideSteps" style="margin:14px 0 0;padding-left:20px;line-height:1.5"></ol><div class="muted" style="margin-top:12px">Once installed, the app opens in its own window with its own icon.</div></div></div>
 <header id="appHeader" class="hidden"><div class="top"><div style="display:flex;gap:10px;align-items:center"><button class="sidebarToggle" onclick="toggleSidebar()" aria-label="Open menu">☰</button><img id="headerLogo" alt="Company logo" style="display:none;width:42px;height:42px;object-fit:contain;border-radius:10px;background:#ffffff22"><div><h1 id="appTitle">Business Manager</h1><div id="appSubtitle" class="sub">Loading application…</div></div></div><div style="display:flex;align-items:center;gap:8px"><button id="installAppBtn" class="logout hidden" onclick="installPwa()">Install App</button><span id="syncStatus" class="status">Connecting…</span><button class="logout" onclick="logout()">Logout</button></div></div></header>
 <aside id="sidebar" class="hidden"><div id="sidebarBrand"><img id="sidebarLogo" alt="Company logo"><div id="sidebarBrandText"><div id="sidebarBrandName">Business Manager</div><div id="sidebarBrandSub">Business Manager</div></div></div><nav id="nav"></nav><div class="sidebarFooter">Install this system as an app from your browser for a cleaner desktop/mobile experience.</div></aside><div id="sidebarOverlay" onclick="closeSidebar()"></div>
 <main id="appMain" class="hidden">
@@ -54,7 +57,7 @@ let deferredInstallPrompt=null;let realtimeConnection=null;let loadPromise=null;
 const NEUTRAL_BRAND={companyName:'Business Manager',tagline:'Business Manager',primaryColor:'#46554d',secondaryColor:'#2f3b34',backgroundColor:'#f4f6f4'};
 function setText(id,value){const el=$(id);if(el)el.textContent=value}
 function setImg(id,url){const el=$(id);if(!el)return;if(url){el.src=url;el.style.display='block'}else{el.removeAttribute('src');el.style.display='none'}}
-function brandingManifestUrl(s){const version=s?.brandingVersion||s?._brandingVersion||s?._updatedAt||'';return API+'/api/manifest.webmanifest'+(version?`?v=${encodeURIComponent(version)}`:'')}
+function brandingManifestUrl(s){const version=s?.brandingVersion||s?._brandingVersion||s?._updatedAt||'';return './manifest.webmanifest'+(version?`?v=${encodeURIComponent(version)}`:'')}
 function applyBranding(s){settings={...NEUTRAL_BRAND,...(s||{})};document.title=(settings.companyName||NEUTRAL_BRAND.companyName)+' — Business Manager';document.documentElement.style.setProperty('--g',settings.primaryColor||NEUTRAL_BRAND.primaryColor);document.documentElement.style.setProperty('--g2',settings.secondaryColor||NEUTRAL_BRAND.secondaryColor);document.documentElement.style.setProperty('--bg',settings.backgroundColor||NEUTRAL_BRAND.backgroundColor);const name=settings.companyName||NEUTRAL_BRAND.companyName;const tag=settings.tagline||NEUTRAL_BRAND.tagline;setText('appTitle',name);setText('appSubtitle',tag);setText('loginTitle',name+' — Owner Login');setText('loginTagline',tag);setText('splashTitle',name);setText('sidebarBrandName',name);setText('sidebarBrandSub',tag);const splash=assetUrl(settings.loadingLogo);const header=assetUrl(settings.browserLogo);setImg('splashLogo',splash);setImg('loginLogo',splash);setImg('headerLogo',header);setImg('sidebarLogo',header||splash);const fav=assetUrl(settings.favicon||settings.browserLogo);let favicon=document.querySelector('link[data-whitelabel-favicon]');if(fav){if(!favicon){favicon=document.createElement('link');favicon.rel='icon';favicon.dataset.whitelabelFavicon='1';document.head.appendChild(favicon)}favicon.href=fav}else if(favicon){favicon.remove()};let apple=document.querySelector('link[data-whitelabel-apple]');const appleUrl=assetUrl(settings.desktopIcon)||assetUrl(settings.browserLogo);if(appleUrl){if(!apple){apple=document.createElement('link');apple.rel='apple-touch-icon';apple.dataset.whitelabelApple='1';document.head.appendChild(apple)}apple.href=appleUrl}else if(apple){apple.remove()};const tm=document.querySelector('meta[name="theme-color"]');if(tm)tm.content=settings.primaryColor||NEUTRAL_BRAND.primaryColor;const titleMeta=document.querySelector('meta[name="apple-mobile-web-app-title"]');if(titleMeta)titleMeta.content=name;const manifest=document.getElementById('appManifest');if(manifest)manifest.href=brandingManifestUrl(settings);try{renderSettings()}catch(e){console.warn('Optional settings UI initialization skipped:',e)}}
 function preloadImage(url){if(!url)return Promise.resolve();return new Promise(resolve=>{const img=new Image();img.onload=()=>resolve();img.onerror=()=>resolve();img.src=url})}
 async function preloadCriticalBranding(s){await Promise.all([assetUrl(s?.loadingLogo),assetUrl(s?.browserLogo),assetUrl(s?.desktopIcon),assetUrl(s?.favicon)].map(preloadImage))}
@@ -251,11 +254,128 @@ function downloadReport(){location=`${API}/api/reports/excel?from=${encodeURICom
 let socketClientLoader=null;
 function loadSocketClient(){if(window.io)return Promise.resolve(window.io);if(socketClientLoader)return socketClientLoader;socketClientLoader=new Promise((resolve,reject)=>{const sc=document.createElement('script');sc.src=API+'/socket.io/socket.io.js';sc.async=true;sc.onload=()=>window.io?resolve(window.io):reject(new Error('Socket.IO client unavailable.'));sc.onerror=()=>reject(new Error('Socket.IO client failed to load.'));document.head.appendChild(sc)});return socketClientLoader}
 async function connectRealtime(){if(!token())return;if(realtimeConnection){try{realtimeConnection.close()}catch{}}try{const io=await loadSocketClient();const socket=io(API,{auth:{token:token()},transports:['websocket','polling'],reconnection:true,reconnectionAttempts:Infinity,reconnectionDelay:500,reconnectionDelayMax:4000,timeout:10000});realtimeConnection=socket;socket.on('ready',()=>setSync('Realtime connected'));socket.on('connect',()=>setSync('Realtime connected'));socket.on('data-change',scheduleRealtimeRefresh);socket.on('disconnect',()=>setSync('Reconnecting…',true));socket.on('connect_error',()=>setSync('Reconnecting…',true));window.addEventListener('beforeunload',()=>socket.close(),{once:true})}catch{setSync('Offline mode',true)}}
-function isStandalone(){return window.matchMedia?.('(display-mode: standalone)').matches||window.navigator.standalone===true}
-function isIos(){return /iphone|ipad|ipod/i.test(navigator.userAgent)}
-function refreshInstallUi(){const buttons=[$('installAppBtn'),$('authInstallAppBtn')].filter(Boolean);const help=$('installHelp');if(isStandalone()){buttons.forEach(b=>b.classList.add('hidden'));if(help)help.classList.add('hidden');return}if(deferredInstallPrompt){buttons.forEach(b=>b.classList.remove('hidden'));if(help){help.textContent='';help.classList.add('hidden')}return}if(isIos()){buttons.forEach(b=>b.classList.remove('hidden'));if(help){help.textContent='On iPhone/iPad: tap Share → Add to Home Screen → Add. The button opens these instructions because iOS does not provide the Android/Desktop install prompt.';help.classList.remove('hidden')}}else{buttons.forEach(b=>b.classList.remove('hidden'));if(help){help.textContent='Tap Install App. If your browser does not show the native prompt yet, use the browser menu and choose Install App / Add to Home Screen.';help.classList.remove('hidden')}}}
-window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstallPrompt=e;refreshInstallUi()});window.addEventListener('appinstalled',()=>{deferredInstallPrompt=null;refreshInstallUi();showToast('The application was installed as an app.')});async function installPwa(){if(deferredInstallPrompt){const prompt=deferredInstallPrompt;deferredInstallPrompt=null;refreshInstallUi();try{prompt.prompt();await prompt.userChoice}catch{}return}if(isIos()){alert('Install on iPhone/iPad:\n\n1. Open this system in Safari.\n2. Tap Share.\n3. Tap “Add to Home Screen”.\n4. Tap Add.');return}showToast('Open your browser menu and choose Install App / Add to Home Screen.');}
+/* ==========================================================================
+   PWA installation — single authoritative implementation.
+   Generic / white-label: no company name is hardcoded here.
+   ========================================================================== */
+function pwaBrandName(){return (typeof settings==='object'&&settings&&settings.companyName)||document.getElementById('appTitle')?.textContent||'this app'}
+function isStandalone(){
+  return window.matchMedia?.('(display-mode: standalone)').matches===true
+    || window.matchMedia?.('(display-mode: minimal-ui)').matches===true
+    || window.matchMedia?.('(display-mode: window-controls-overlay)').matches===true
+    || window.navigator.standalone===true
+    || new URLSearchParams(location.search).get('source')==='pwa'&&window.matchMedia?.('(display-mode: standalone)').matches===true;
+}
+function isIos(){
+  const ua=navigator.userAgent||'';
+  if(/iphone|ipad|ipod/i.test(ua)) return true;
+  // iPadOS 13+ reports a desktop Safari user agent.
+  return /Macintosh/i.test(ua)&&navigator.maxTouchPoints>1;
+}
+function isIpadLike(){return isIos()&&(/ipad/i.test(navigator.userAgent)||(/Macintosh/i.test(navigator.userAgent)&&navigator.maxTouchPoints>1))}
+function isAndroid(){return /android/i.test(navigator.userAgent)}
+function isFirefox(){return /firefox|fxios/i.test(navigator.userAgent)}
+function isDesktopSafari(){return /Safari/i.test(navigator.userAgent)&&!/Chrome|Chromium|Edg|OPR/i.test(navigator.userAgent)&&!isIos()}
+function installInstructions(){
+  if(isIos()){
+    const device=isIpadLike()?'iPad':'iPhone';
+    return {title:`Install App on ${device}`,steps:[
+      'Open this app in Safari.',
+      'Tap the Share button at the bottom (or top) of Safari.',
+      'Scroll down and tap “Add to Home Screen”.',
+      'Tap “Add” in the top-right corner.',
+      'Launch the app from your Home Screen — it opens full screen like a normal app.'
+    ]};
+  }
+  if(isAndroid()){
+    return {title:'Install App on Android',steps:[
+      'Open this app in Chrome (or another Chromium browser).',
+      'Tap the browser menu (⋮) in the top-right corner.',
+      'Tap “Install app” or “Add to Home screen”.',
+      'Confirm with “Install”.'
+    ]};
+  }
+  if(isDesktopSafari()){
+    return {title:'Install App on Mac (Safari)',steps:[
+      'Open the “File” menu in Safari.',
+      'Choose “Add to Dock…”.',
+      'Confirm with “Add”. The app appears in your Dock and Launchpad.'
+    ]};
+  }
+  if(isFirefox()){
+    return {title:'Install App',steps:[
+      'Firefox does not support desktop app installation.',
+      'Open this app in Chrome, Edge or another Chromium browser.',
+      'Then use “Install App” again, or the install icon in the address bar.'
+    ]};
+  }
+  return {title:'Install App on Desktop',steps:[
+    'Look for the install icon in the browser address bar (a screen with a down arrow).',
+    'Or open the browser menu (⋮) and choose “Install app” / “Apps → Install this site as an app”.',
+    'Confirm with “Install”. The app is added to your desktop and application list.'
+  ]};
+}
+function openInstallGuide(){
+  const info=installInstructions();
+  const box=$('installGuide');
+  if(!box){return}
+  setText('installGuideTitle',info.title);
+  const list=$('installGuideSteps');
+  if(list) list.innerHTML=info.steps.map(step=>`<li style="margin-bottom:7px">${esc(step)}</li>`).join('');
+  box.classList.add('open');
+}
+function closeInstallGuide(){$('installGuide')?.classList.remove('open')}
+function refreshInstallUi(){
+  const buttons=[$('installAppBtn'),$('authInstallAppBtn')].filter(Boolean);
+  const help=$('installHelp');
+  const installed=isStandalone();
+  if(installed){
+    buttons.forEach(b=>{b.textContent='App Installed';b.disabled=true;b.classList.add('hidden')});
+    if(help){help.textContent='';help.classList.add('hidden')}
+    closeInstallGuide();
+    return;
+  }
+  const label=deferredInstallPrompt?'Install App':(isIos()?`Install App on ${isIpadLike()?'iPad':'iPhone'}`:'Install App');
+  buttons.forEach(b=>{b.textContent=label;b.disabled=false;b.classList.remove('hidden')});
+  if(help){
+    if(deferredInstallPrompt){help.textContent='';help.classList.add('hidden')}
+    else{help.textContent=isIos()?'Tap Install App for the Add to Home Screen steps.':'Tap Install App for the installation steps for your browser.';help.classList.remove('hidden')}
+  }
+}
+async function installPwa(){
+  if(isStandalone()){refreshInstallUi();showToast('The app is already installed on this device.');return}
+  if(deferredInstallPrompt){
+    const promptEvent=deferredInstallPrompt;
+    try{
+      promptEvent.prompt();
+      const choice=await promptEvent.userChoice;
+      if(choice&&choice.outcome==='accepted'){deferredInstallPrompt=null;refreshInstallUi();return}
+      // Dismissed: the same event cannot be reused, offer the manual route instead.
+      deferredInstallPrompt=null;
+      refreshInstallUi();
+      return;
+    }catch{
+      deferredInstallPrompt=null;
+      refreshInstallUi();
+      openInstallGuide();
+      return;
+    }
+  }
+  openInstallGuide();
+}
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstallPrompt=e;refreshInstallUi()});
+window.addEventListener('appinstalled',()=>{deferredInstallPrompt=null;refreshInstallUi();closeInstallGuide();showToast('The app was installed on your device.')});
+// Live state detection — no manual refresh is ever required.
+['standalone','minimal-ui','window-controls-overlay'].forEach(mode=>{
+  const mq=window.matchMedia?.(`(display-mode: ${mode})`);
+  if(mq?.addEventListener) mq.addEventListener('change',refreshInstallUi);
+  else mq?.addListener?.(refreshInstallUi);
+});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshInstallUi()});
+window.addEventListener('focus',refreshInstallUi);
+window.addEventListener('pageshow',refreshInstallUi);
+setInterval(refreshInstallUi,4000);
 refreshInstallUi();
-initializeApp().catch(err=>{setSync('Startup recovered',true);hideBrandSplash();showAuth()});if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js',{scope:'./'}).catch(()=>{});
+initializeApp().catch(err=>{setSync('Startup recovered',true);hideBrandSplash();showAuth()});if('serviceWorker' in navigator&&window.isSecureContext){navigator.serviceWorker.register('./sw.js',{scope:'./',updateViaCache:'none'}).then(reg=>{reg.update().catch(()=>{});setTimeout(refreshInstallUi,0)}).catch(()=>{});}
 </script>
 </body></html>
