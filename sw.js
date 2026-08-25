@@ -1,5 +1,5 @@
-const CACHE='whitelabel-pwa-v5-8-0';
-const APP_SHELL=['./','./index.html'];
+const CACHE='whitelabel-pwa-v6-0-0';
+const APP_SHELL=['./','./index.html','./vendor/chart.umd.js'];
 // Branding assets are now versioned (?v=<brandingVersion>) and cacheable, so
 // they are served from cache instantly instead of being re-downloaded on every
 // launch. Only the API stays uncacheable.
