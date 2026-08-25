@@ -443,6 +443,30 @@ tr.bad>td{background:#fff7f6}
 <div class="grid">
   <div class="card"><h3 style="margin-top:0">Backup & Restore</h3><p class="muted">Create a complete white-label backup containing the SQLite database, settings, and uploaded branding assets.</p><div class="notice"><b>Backup file:</b> <code>.vegebak</code><br>This is the system's self-contained backup format. Legacy <code>.sqlite3</code> backups remain restorable.</div><div class="actions"><button class="primary" onclick="downloadBackup()">⬇ Download Full Backup</button><label class="secondary" style="cursor:pointer">↥ Restore Backup<input id="restoreFile" type="file" accept=".vegebak,.sqlite3,application/octet-stream" style="display:none" onchange="restoreBackup()"></label></div><div id="backupStatus" class="muted"></div></div>
   <div class="card" id="systemHealthCard"><h3 style="margin-top:0">System Health</h3><p class="muted">Live self-check of the books, the database and your backups.</p><div class="actions"><button class="secondary" onclick="loadSystemHealth()">↻ Run Health Check</button></div><div id="systemHealthBody" class="muted">Not checked yet.</div></div>
+  <div class="card" id="smsCard"><h3 style="margin-top:0">Owner SMS Alerts</h3>
+  <p class="muted">Text-message alerts sent to the owner's phone through the SMSGate Android gateway. Every figure in an SMS comes from the same calculations shown on this app - the message can never disagree with the screen.</p>
+  <div id="smsGatewayStatus" class="notice">Loading SMS status...</div>
+  <div class="row"><div class="field"><label>SMS Alerts</label><select id="smsEnabled"><option value="false">Off</option><option value="true">On</option></select></div>
+    <div class="field"><label>Owner Mobile Number</label><input id="smsOwnerNumber" maxlength="32" placeholder="09171234567" autocomplete="tel"></div>
+    <div class="field"><label>Daily Summary Time</label><input id="smsDailyTime" type="time"></div>
+    <div class="field"><label>Group Alerts For (seconds)</label><input id="smsBatchWindow" type="number" min="0" max="900" step="5"></div></div>
+  <h4 style="margin:14px 0 4px">What to be alerted about</h4>
+  <div class="row" id="smsCategories"></div>
+  <h4 style="margin:14px 0 4px">Thresholds <span class="muted" style="font-weight:400">(0 = off)</span></h4>
+  <div class="row" id="smsThresholds"></div>
+  <h4 style="margin:14px 0 4px">Quiet Hours</h4>
+  <div class="row"><div class="field"><label>Enable Quiet Hours</label><select id="smsQuietEnabled"><option value="false">Off</option><option value="true">On</option></select></div>
+    <div class="field"><label>From</label><input id="smsQuietFrom" type="time"></div>
+    <div class="field"><label>To</label><input id="smsQuietTo" type="time"></div></div>
+  <div class="notice">Critical alerts (expired stock, spoilage, failed backup, books not balancing) are always sent immediately, even during quiet hours.</div>
+  <div class="actions"><button class="primary" onclick="saveSmsSettings()">Save SMS Settings</button>
+    <button class="secondary" onclick="sendSmsTest()">Send Test SMS</button>
+    <button class="secondary" onclick="runSmsScan()">Re-check Now</button>
+    <button class="secondary" onclick="sendSmsSummary()">Send Summary Now</button></div>
+  <div id="smsStatusBody" class="muted"></div></div>
+  <div class="card" id="smsHistoryCard"><h3 style="margin-top:0">SMS Notification History</h3><p class="muted">Every alert this system has attempted, with delivery state.</p>
+  <div class="actions"><button class="secondary" onclick="loadSmsHistory()">Refresh</button><button class="secondary" onclick="retryFailedSms()">Retry Failed</button></div>
+  <div id="smsHistoryBody" class="muted">Not loaded yet.</div></div>
   <div class="card"><h3 style="margin-top:0">White-label Configuration</h3><div class="row"><div class="field"><label>Company Name</label><input id="setCompanyName" maxlength="180"></div><div class="field"><label>Tagline</label><input id="setTagline" maxlength="500"></div></div><div class="row"><div class="field"><label>Primary Color</label><div style="display:flex;gap:8px"><input id="setPrimaryColor" class="colorSwatch" type="color"><input id="setPrimaryColorText" maxlength="7"></div></div><div class="field"><label>Secondary Color</label><div style="display:flex;gap:8px"><input id="setSecondaryColor" class="colorSwatch" type="color"><input id="setSecondaryColorText" maxlength="7"></div></div><div class="field"><label>Background Color</label><div style="display:flex;gap:8px"><input id="setBackgroundColor" class="colorSwatch" type="color"><input id="setBackgroundColorText" maxlength="7"></div></div></div><div class="actions"><button class="primary" onclick="saveSettings()">Save White-label Settings</button></div></div>
   <div class="card"><h3 style="margin-top:0">Brand Assets</h3><p class="muted">PNG, JPG or WebP. Each upload replaces only that asset.</p><div id="assetSettings"></div></div>
   <div class="card"><h3 style="margin-top:0">Receipt Configuration</h3><p class="muted">Stored now for future receipt/printing features. It does not change existing transaction behavior.</p><div class="row"><div class="field"><label>Enable Receipt Features</label><select id="receiptEnabled"><option value="false">Disabled</option><option value="true">Enabled</option></select></div><div class="field"><label>Paper Size</label><select id="receiptPaper"><option>58mm</option><option selected>80mm</option><option>A4</option></select></div></div><div class="row"><div class="field"><label>Receipt Header</label><input id="receiptHeader"></div><div class="field"><label>Receipt Footer</label><input id="receiptFooter"></div></div><div class="row"><div class="field"><label>Business Address</label><input id="receiptAddress"></div><div class="field"><label>Phone</label><input id="receiptPhone"></div><div class="field"><label>Email</label><input id="receiptEmail"></div><div class="field"><label>TIN</label><input id="receiptTin"></div></div><label style="display:flex;gap:8px;align-items:center;margin-top:10px"><input id="receiptShowLogo" type="checkbox"> Show logo on future receipts</label><div class="actions"><button class="primary" onclick="saveReceiptSettings()">Save Receipt Configuration</button></div></div>
@@ -518,7 +542,52 @@ function goPage(id){showPage(id);closeSidebar();closeMoreSheet()}
 function openMoreSheet(){$('moreSheet').classList.add('open')}
 function closeMoreSheet(){$('moreSheet').classList.remove('open')}
 ['cashDate','saleDate','purchaseDate','collectionDate','stockDate','spoilageDate','pOpenDate','fromDate','toDate'].forEach(id=>$(id).value=today);$('fromDate').value=today.slice(0,8)+'01';
-function showPage(id,btn){document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));const page=$(id);if(!page)return;page.classList.add('active');document.querySelectorAll('#nav button,#mobileNav button,#moreSheetGrid button').forEach(x=>x.classList.toggle('active',x.dataset.page===id));if(!MOBILE_PRIMARY.includes(id))document.querySelector('#mobileNav button[data-page="__more"]')?.classList.add('active');window.scrollTo({top:0,behavior:'instant'});if(id==='reports')applyReportPeriod();if(id==='settings')renderSettings();if(id==='dashboard')loadAnalytics()}
+function showPage(id,btn){document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));const page=$(id);if(!page)return;page.classList.add('active');document.querySelectorAll('#nav button,#mobileNav button,#moreSheetGrid button').forEach(x=>x.classList.toggle('active',x.dataset.page===id));if(!MOBILE_PRIMARY.includes(id))document.querySelector('#mobileNav button[data-page="__more"]')?.classList.add('active');window.scrollTo({top:0,behavior:'instant'});if(id==='reports')applyReportPeriod();if(id==='settings')renderSettings();if(id==='settings'){loadSmsSettings();loadSmsHistory()}if(id==='dashboard')loadAnalytics()}
+
+const SMS_CATS=[["inventory", "Inventory & expiry"], ["financial", "Cash & financial"], ["receivable", "Customer receivables"], ["payable", "Supplier payables"], ["loan", "Loans"], ["system", "System & backups"], ["largeTransactions", "Large transactions"], ["dailySummary", "Daily business summary"], ["weeklySummary", "Weekly business summary"]];
+const SMS_THRESH=[["largeSale", "Large sale amount"], ["largePurchase", "Large purchase amount"], ["largeCollection", "Large collection amount"], ["largeCashIn", "Large cash in"], ["largeCashOut", "Large cash out"], ["lowCash", "Low cash floor"], ["inventoryLossValue", "Spoilage loss value"], ["stocktakeVarianceValue", "Stocktake variance value"], ["receivableOverdueDays", "Receivable overdue (days)"], ["receivableOverdueAmount", "Receivable overdue amount"], ["payableOverdueDays", "Payable overdue (days)"], ["payableOverdueAmount", "Payable overdue amount"], ["loanOutstanding", "Loan outstanding above"]];
+let smsSettings=null;
+function smsBadge(t,cls){return `<span class="pill ${cls||''}">${t}</span>`}
+async function loadSmsSettings(){const box=$('smsGatewayStatus');if(!box)return;try{const r=await api('/sms/settings');smsSettings=r.settings||{};
+ $('smsEnabled').value=String(Boolean(smsSettings.enabled));
+ $('smsOwnerNumber').value=smsSettings.ownerNumber||'';
+ $('smsDailyTime').value=smsSettings.dailySummaryTime||'18:00';
+ $('smsBatchWindow').value=num(smsSettings.batchWindowSeconds);
+ $('smsQuietEnabled').value=String(Boolean(smsSettings.quietHours&&smsSettings.quietHours.enabled));
+ $('smsQuietFrom').value=(smsSettings.quietHours&&smsSettings.quietHours.from)||'21:00';
+ $('smsQuietTo').value=(smsSettings.quietHours&&smsSettings.quietHours.to)||'07:00';
+ const cats=smsSettings.categories||{};
+ $('smsCategories').innerHTML=SMS_CATS.map(([k,label])=>`<label class="field" style="display:flex;flex-direction:row;gap:10px;align-items:center;justify-content:flex-start"><input type="checkbox" id="smsCat_${k}" style="width:18px;height:18px;flex:0 0 auto;margin:0" ${cats[k]?'checked':''}><span style="flex:1 1 auto">${label}</span></label>`).join('');
+ const th=smsSettings.thresholds||{};
+ $('smsThresholds').innerHTML=SMS_THRESH.map(([k,label])=>`<div class="field"><label>${label}</label><input id="smsTh_${k}" type="number" min="0" step="1" value="${num(th[k])}"></div>`).join('');
+ const g=r.gateway||{};
+ box.className='notice'+(g.configured?'':' bad');
+ box.innerHTML=g.configured?`<b>Gateway ready</b> — ${g.mode==='cloud'?'SMSGate Cloud':'SMSGate on your device'} at <code>${g.endpoint}</code>${g.sim?' · SIM '+g.sim:''}${g.expeditedPriority?' · high priority':''}`
+  :`<b>Gateway not configured.</b> Set <code>SMSGATE_USERNAME</code> and <code>SMSGATE_PASSWORD</code> on the server (from the SMSGate app), then reload. Alerts are recorded but cannot be sent until then.`;
+ loadSmsStatus();
+}catch(e){box.className='notice bad';box.textContent='Could not load SMS settings: '+e.message}}
+async function loadSmsStatus(){const el=$('smsStatusBody');if(!el)return;try{const s=await api('/sms/status');const q=s.queue||{};
+ el.innerHTML=`Alerts: <b>${s.enabled?'On':'Off'}</b> · Number: <b>${s.hasOwnerNumber?s.ownerNumberMasked:'not set'}</b> · Queued: <b>${num(q.queued)}</b> · Sent: <b>${num(q.sent)}</b> · Failed: <b>${num(q.failed)}</b> · Watching: <b>${num(s.pendingEvents)}</b> open issue(s)`
+  +(s.lastScanAt?`<br>Last check: ${new Date(s.lastScanAt).toLocaleString()}`:'')
+  +(s.lastErrorKind?`<br><span style="color:#8f211b">Last send problem: ${s.lastErrorKind}</span>`:'');
+}catch(e){el.textContent=''}}
+function smsPayload(){const cats={},th={};for(const [k] of SMS_CATS)cats[k]=$('smsCat_'+k)?.checked||false;for(const [k] of SMS_THRESH)th[k]=num($('smsTh_'+k)?.value);
+ return {enabled:$('smsEnabled').value==='true',ownerNumber:$('smsOwnerNumber').value.trim(),categories:cats,thresholds:th,
+  dailySummaryTime:$('smsDailyTime').value||'18:00',batchWindowSeconds:num($('smsBatchWindow').value),
+  quietHours:{enabled:$('smsQuietEnabled').value==='true',from:$('smsQuietFrom').value||'21:00',to:$('smsQuietTo').value||'07:00'}}}
+async function saveSmsSettings(){try{const r=await api('/sms/settings',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(smsPayload())});smsSettings=r.settings||smsSettings;showToast('SMS settings saved');loadSmsSettings()}catch(e){showToast(e.message,true)}}
+async function sendSmsTest(){try{await api('/sms/test',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({})});showToast('Test SMS sent')}catch(e){showToast(e.message,true)}finally{loadSmsStatus();loadSmsHistory()}}
+async function runSmsScan(){try{await api('/sms/scan',{method:'POST'});showToast('Safety check complete');loadSmsStatus();loadSmsHistory()}catch(e){showToast(e.message,true)}}
+async function sendSmsSummary(){try{await api('/sms/summary',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({kind:'daily'})});showToast('Summary SMS queued');loadSmsStatus();loadSmsHistory()}catch(e){showToast(e.message,true)}}
+async function retryFailedSms(){try{const r=await api('/sms/retry',{method:'POST'});showToast('Requeued '+num(r.requeued)+' message(s)');loadSmsStatus();loadSmsHistory()}catch(e){showToast(e.message,true)}}
+async function loadSmsHistory(){const el=$('smsHistoryBody');if(!el)return;try{const r=await api('/sms/history?limit=50');const rows=r.messages||[];
+ if(!rows.length){el.textContent='No SMS alerts yet.';return}
+ el.innerHTML=`<div class="tablewrap"><table><thead><tr><th>When</th><th>Type</th><th>Priority</th><th>Status</th><th>Message</th></tr></thead><tbody>`+
+ rows.map(m=>`<tr><td>${new Date(m.at).toLocaleString()}</td><td>${m.category}${m.part?' ('+m.part+')':''}</td><td>${m.severity}</td>
+  <td>${m.status}${m.delivery&&m.delivery!==m.status?' / '+m.delivery:''}${m.attempts>1?' · try '+m.attempts:''}${m.error_kind?'<br><span style="color:#8f211b">'+m.error_kind+'</span>':''}</td>
+  <td style="white-space:pre-wrap">${(m.preview||'').replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]))}</td></tr>`).join('')+`</tbody></table></div>`;
+}catch(e){el.textContent='Could not load history: '+e.message}}
+
 function categories(dir){return dir==='in'?['Other Operating Income','Owner Capital Contribution','Loan Proceeds','Sale of Fixed Asset','Other Income','Other Cash In']:['Farm Inputs','Farm Labor','Transportation / Delivery','Fuel','Packaging','Rent','Utilities','Salaries & Wages','Advertising & Marketing','Repairs & Maintenance','Taxes & Government Fees','Bank Charges','Equipment Purchase','Vehicle Purchase','Loan Principal Repayment','Owner Drawings / Withdrawal','Supplier Payment / AP','Other Operating Expense','Other Cash Out']}
 const cashExamples={
   'Other Operating Income':'kita sa pagbaligya og by-products sa tanom, seedlings, o service nga konektado sa negosyo.',
@@ -803,7 +872,7 @@ async function recordSpoilage(){const btn=$('spoilageBtn');btn.disabled=true;try
 let currentStocktake=null;
 async function recordStocktake(){try{const r=await api('/inventory/stocktake',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({date:$('stockDate').value,notes:$('stockNotes').value})});$('stockResult').textContent=`Snapshot #${r.id}: ${r.items} products • System inventory value ${money(r.total_value)}`;currentStocktake=r.id;await loadStocktakeCount(r.id);showToast('Stocktake snapshot saved. Enter the counted quantities below.')}catch(e){showToast(e.message,true)}}
 async function loadStocktakeCount(id){try{const r=await api('/inventory/stocktake/'+id);const rows=r.items.map(x=>`<tr><td>${esc(x.product_name||('#'+x.product_id))}</td><td>${Number(x.system_qty).toFixed(3)} ${esc(x.unit||'')}</td><td><input data-stocktake-product="${x.product_id}" type="number" min="0" step=".001" value="${x.counted_qty===null?'':Number(x.counted_qty).toFixed(3)}" style="max-width:120px"></td><td>${x.variance_qty===null?'—':Number(x.variance_qty).toFixed(3)}</td><td>${x.variance_value===null?'—':money(x.variance_value)}</td></tr>`).join('');
-  $('stocktakeCount').innerHTML=`<h4 style="margin:6px 0">Physical Count — Stocktake #${id} (${esc(r.stocktake.date)})</h4><div class="tableWrap"><table><thead><tr><th>Product</th><th>System Qty</th><th>Counted Qty</th><th>Variance</th><th>Variance Value</th></tr></thead><tbody>${rows}</tbody></table></div><div class="row" style="margin-top:8px"><button class="primary" onclick="submitStocktakeCount(${id})">Save Counted Quantities</button></div><div class="muted" style="margin-top:6px">${esc(r.formula)}</div>`;
+  $('stocktakeCount').innerHTML=`<h4 style="margin:6px 0">Physical Count — Stocktake #${id} (${esc(r.stocktake.date)})</h4><div class="tablewrap"><table><thead><tr><th>Product</th><th>System Qty</th><th>Counted Qty</th><th>Variance</th><th>Variance Value</th></tr></thead><tbody>${rows}</tbody></table></div><div class="row" style="margin-top:8px"><button class="primary" onclick="submitStocktakeCount(${id})">Save Counted Quantities</button></div><div class="muted" style="margin-top:6px">${esc(r.formula)}</div>`;
 }catch(e){showToast(e.message,true)}}
 async function submitStocktakeCount(id){try{const items=[...document.querySelectorAll('[data-stocktake-product]')].filter(i=>String(i.value).trim()!=='').map(i=>({product_id:Number(i.dataset.stocktakeProduct),counted_qty:Number(i.value)}));
   if(!items.length)return showToast('Enter at least one counted quantity.',true);
