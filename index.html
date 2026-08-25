@@ -219,65 +219,14 @@ label.secondary{cursor:pointer}
 .toast.show{display:block}
 
 /* ---------- tables ------------------------------------------------------- */
-/* Tables always fit the available width: cells wrap instead of pushing the
-   table wider, and density steps down automatically as the column count
-   grows. Horizontal scrolling is only a last-resort fallback (mobile and
-   tables explicitly marked .wide). */
 .tablewrap{overflow-x:auto;overflow-y:visible;border:1px solid var(--line);border-radius:var(--r-md);background:#fff;-webkit-overflow-scrolling:touch}
-table{border-collapse:collapse;width:100%;max-width:100%;background:#fff;table-layout:auto}
+table{border-collapse:collapse;width:100%;background:#fff}
 th,td{padding:11px var(--s3);border-bottom:1px solid #eaefeb;text-align:left;font-size:var(--fs-2);vertical-align:middle}
 th{background:var(--surface-2);position:sticky;top:0;z-index:1;font-size:var(--fs-1);text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:750;white-space:nowrap}
 tbody tr:last-child td{border-bottom:0}
 tbody tr:hover td{background:#fbfdfb}
 tr.bad>td{background:#fff7f6}
 .tablewrap table td.num,.tablewrap table th.num{text-align:right;font-variant-numeric:tabular-nums}
-
-/* ---- auto-fit tables (tablet + desktop): no horizontal scrollbar ------- */
-@media (min-width:768px){
-  .tablewrap:not(.wide){overflow-x:clip}
-  .tablewrap:not(.wide) table{width:100%;max-width:100%}
-  /* cells shrink and wrap; long unbroken strings break rather than stretch */
-  .tablewrap:not(.wide) th,
-  .tablewrap:not(.wide) td{white-space:normal;overflow-wrap:break-word;word-break:normal;min-width:0}
-  /* keep numeric / date / short-code columns on one line but narrow */
-  .tablewrap:not(.wide) td.num,.tablewrap:not(.wide) th.num,
-  .tablewrap:not(.wide) td.fitNum,.tablewrap:not(.wide) th.fitNum{white-space:nowrap;width:1%;min-width:max-content}
-  .tablewrap:not(.wide) td.fitActs,.tablewrap:not(.wide) th.fitActs{white-space:nowrap;width:1%}
-  /* text columns give up their width first, wrapping between words */
-  .tablewrap:not(.wide) td:not(.num):not(.fitNum):not(.fitActs),
-  .tablewrap:not(.wide) th:not(.num):not(.fitNum):not(.fitActs){overflow-wrap:break-word}
-
-  .tablewrap:not(.wide) td .tag{white-space:normal}
-  .tablewrap:not(.wide) td .rowInput{min-width:0;width:100%}
-  /* actions column takes only what its buttons need */
-  .tablewrap:not(.wide) td .rowActs{flex-wrap:nowrap;gap:4px;justify-content:flex-end}
-  .tablewrap:not(.wide) table tr>*:last-child:has(.rowActs){width:1%;white-space:nowrap}
-
-
-  /* density steps down as the column count grows */
-  .tablewrap:not(.wide) table:has(thead th:nth-child(6)) th,
-  .tablewrap:not(.wide) table:has(thead th:nth-child(6)) td{padding:9px 10px}
-  .tablewrap:not(.wide) table:has(thead th:nth-child(8)) th,
-  .tablewrap:not(.wide) table:has(thead th:nth-child(8)) td{padding:8px 8px;font-size:var(--fs-1)}
-  .tablewrap:not(.wide) table:has(thead th:nth-child(8)) .iconBtn{min-width:30px;min-height:30px;padding:4px 5px}
-  .tablewrap:not(.wide) table:has(thead th:nth-child(11)) th,
-  .tablewrap:not(.wide) table:has(thead th:nth-child(11)) td{padding:5px 4px;font-size:10.5px;line-height:1.35;letter-spacing:0}
-  .tablewrap:not(.wide) table:has(thead th:nth-child(11)) .iconBtn{min-width:28px;min-height:28px;padding:3px 4px}
-  /* 11+ columns: allow breaking inside long words so nothing overflows */
-  .tablewrap:not(.wide) table:has(thead th:nth-child(11)) td,
-  .tablewrap:not(.wide) table:has(thead th:nth-child(11)) th{overflow-wrap:anywhere}
-}
-
-/* tablet: very wide tables (11+ columns) get the tightest fit available */
-@media (min-width:768px) and (max-width:1023px){
-  .tablewrap:not(.wide) table:has(thead th:nth-child(11)) th,
-  .tablewrap:not(.wide) table:has(thead th:nth-child(11)) td{padding:5px 4px;font-size:10.5px;letter-spacing:0}
-  /* last resort at tablet width: numbers may wrap, but never below 6 chars */
-  .tablewrap:not(.wide) table:has(thead th:nth-child(11)) td.fitNum,
-  .tablewrap:not(.wide) table:has(thead th:nth-child(11)) th.fitNum{white-space:normal;width:auto;min-width:6ch;overflow-wrap:anywhere}
-}
-
-
 
 /* ---------- modals / dialogs -------------------------------------------- */
 .modal{position:fixed;inset:0;background:rgba(12,22,16,.5);display:none;align-items:center;justify-content:center;padding:var(--s4);z-index:50}
@@ -936,38 +885,17 @@ function drawPnlChart(){
    card layout (td::before) stays in sync with any table, including the
    hand-built ones. Presentation only — no data is changed. */
 function decorateTables(root=document){
-  const NUMLIKE=/^[-+₱$€£]?\s*[\d.,%\s/:-]+$/;
   root.querySelectorAll('.tablewrap table').forEach(t=>{
     const hs=[...t.querySelectorAll('thead th')].map(th=>th.textContent.replace(/\s+/g,' ').trim());
-    const rows=[...t.querySelectorAll('tbody tr')].filter(tr=>!tr.querySelector('[colspan]'));
-    rows.forEach(tr=>{
+    t.querySelectorAll('tbody tr').forEach(tr=>{
       [...tr.children].forEach((td,i)=>{
         if(td.hasAttribute('colspan')){td.classList.add('tdEmpty');return}
         if(hs[i]!==undefined&&hs[i]!=='')td.setAttribute('data-label',hs[i]);
         if(i===0&&hs[i])td.setAttribute('data-primary','1');
       });
     });
-    /* Column-width fitting: a column whose values are all numbers, money,
-       dates or action buttons is kept narrow and unbroken, so the remaining
-       width goes to the text columns and the table fits without scrolling. */
-    const colCount=hs.length||(rows[0]?rows[0].children.length:0);
-    for(let i=0;i<colCount;i++){
-      const cells=rows.map(tr=>tr.children[i]).filter(Boolean);
-      if(!cells.length)continue;
-      const acts=cells.every(td=>td.querySelector('.rowActs,.iconBtn'));
-      const numeric=!acts&&cells.every(td=>{
-        const v=td.textContent.replace(/\s+/g,' ').trim();
-        return v===''||v==='—'||(v.length<=24&&NUMLIKE.test(v));
-      });
-      if(!acts&&!numeric)continue;
-      const cls=acts?'fitActs':'fitNum';
-      cells.forEach(td=>td.classList.add(cls));
-      const th=t.querySelectorAll('thead th')[i];
-      if(th)th.classList.add(cls);
-    }
   });
 }
-
 let decorateTimer=null;
 new MutationObserver(()=>{clearTimeout(decorateTimer);decorateTimer=setTimeout(()=>decorateTables(),40)})
   .observe(document.documentElement,{childList:true,subtree:true});
