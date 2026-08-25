@@ -64,7 +64,11 @@ svg{flex:none}
 
 /* ---------- app shell ---------------------------------------------------- */
 header{background:linear-gradient(135deg,var(--g),var(--g2));color:#fff;position:sticky;top:0;z-index:30;padding:0 var(--s4);min-height:var(--head-h);display:flex;align-items:center;box-shadow:0 1px 0 rgba(255,255,255,.08),var(--sh-1);padding-top:env(safe-area-inset-top)}
-header .top{display:flex;justify-content:space-between;gap:var(--s3);align-items:center;width:100%;min-height:var(--head-h)}
+header .top{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:var(--s3);align-items:center;width:100%;min-height:var(--head-h)}
+header .top>div{min-width:0}
+header .top>div:first-child{min-width:0}
+header .top>div:first-child>div:last-child{min-width:0}
+header .top>div:last-child{flex:none;min-width:max-content}
 header h1{font-size:var(--fs-4);font-weight:750;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .headBrand{display:flex;align-items:center;gap:var(--s3);min-width:0}
 .headBrand>div{min-width:0}
@@ -93,9 +97,9 @@ nav button.active .navIcon{opacity:1}
 .sidebarFooter{padding:var(--s3) var(--s2) 0;color:var(--muted);font-size:var(--fs-1);border-top:1px solid var(--line);line-height:1.45}
 #sidebarOverlay{display:none;position:fixed;inset:0;background:rgba(12,22,16,.45);z-index:40;backdrop-filter:blur(1px)}
 
-main{margin:0;padding:var(--s6) var(--s6) var(--s8);padding-left:calc(var(--nav-w) + var(--s6));min-height:calc(100vh - var(--head-h));max-width:100%}
-.page{display:none}
-.page.active{display:block;max-width:1360px}
+main{margin:0;padding:var(--s6) var(--s6) var(--s8);padding-left:calc(var(--nav-w) + var(--s6));min-height:calc(100vh - var(--head-h));max-width:100%;overflow-x:hidden}
+.page{display:none;min-width:0}
+.page.active{display:block;width:100%;max-width:1360px;margin-inline:auto;min-width:0}
 .pageHead{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:var(--s4);align-items:start;margin-bottom:var(--s5)}
 .pageHead h2{min-width:0}
 .pageHead .pageSub{color:var(--muted);font-size:var(--fs-2);margin-top:5px;max-width:70ch}
@@ -120,7 +124,7 @@ main{margin:0;padding:var(--s6) var(--s6) var(--s8);padding-left:calc(var(--nav-
 .section{margin-top:var(--s6)}
 .sectionHead{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:var(--s3);align-items:center;margin-bottom:var(--s3)}
 .sectionTitle{font-size:var(--fs-1);letter-spacing:.09em;text-transform:uppercase;color:var(--muted);font-weight:750}
-.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);padding:var(--s5);box-shadow:var(--sh-1)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);padding:var(--s5);box-shadow:var(--sh-1);min-width:0}
 .card>h3:first-child{margin-bottom:var(--s1)}
 .card+.card{margin-top:var(--s4)}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:var(--s4)}
@@ -155,7 +159,7 @@ input:disabled,select:disabled{background:var(--surface-2);color:var(--muted)}
 .formSummary .sumValue{font-size:var(--fs-5);font-weight:800;letter-spacing:-.02em}
 .formActs{display:flex;gap:var(--s2);align-items:center;flex-wrap:wrap}
 
-.primary,.secondary,.danger{border:1px solid transparent;border-radius:var(--r-sm);padding:11px 16px;cursor:pointer;font-weight:700;font-size:var(--fs-3);min-height:44px;display:inline-flex;align-items:center;justify-content:center;gap:7px;transition:background .15s,border-color .15s,transform .06s}
+.primary,.secondary,.danger{border:1px solid transparent;border-radius:var(--r-sm);padding:11px 16px;cursor:pointer;font-weight:700;font-size:var(--fs-3);min-height:44px;display:inline-flex;align-items:center;justify-content:center;gap:7px;transition:background .15s,border-color .15s,transform .06s;max-width:100%;white-space:normal;text-align:center}
 .primary{background:var(--g);color:#fff;box-shadow:var(--sh-1)}
 .primary:hover{background:var(--g2)}
 .primary:active{transform:translateY(1px)}
@@ -219,14 +223,20 @@ label.secondary{cursor:pointer}
 .toast.show{display:block}
 
 /* ---------- tables ------------------------------------------------------- */
-.tablewrap{overflow-x:auto;overflow-y:visible;border:1px solid var(--line);border-radius:var(--r-md);background:#fff;-webkit-overflow-scrolling:touch}
-table{border-collapse:collapse;width:100%;background:#fff}
-th,td{padding:11px var(--s3);border-bottom:1px solid #eaefeb;text-align:left;font-size:var(--fs-2);vertical-align:middle}
-th{background:var(--surface-2);position:sticky;top:0;z-index:1;font-size:var(--fs-1);text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:750;white-space:nowrap}
-tbody tr:last-child td{border-bottom:0}
-tbody tr:hover td{background:#fbfdfb}
-tr.bad>td{background:#fff7f6}
-.tablewrap table td.num,.tablewrap table th.num{text-align:right;font-variant-numeric:tabular-nums}
+.tablewrap,.tableWrap{width:100%;max-width:100%;overflow-x:auto;overflow-y:visible;border:1px solid var(--line);border-radius:var(--r-md);background:#fff;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;scrollbar-gutter:stable}
+.tablewrap::-webkit-scrollbar,.tableWrap::-webkit-scrollbar{height:10px}
+.tablewrap::-webkit-scrollbar-thumb,.tableWrap::-webkit-scrollbar-thumb{background:#cbd8ce;border-radius:var(--r-full);border:2px solid #fff}
+.tablewrap table,.tableWrap table{border-collapse:collapse;width:100%;max-width:100%;background:#fff;table-layout:fixed}
+.tablewrap th,.tablewrap td,.tableWrap th,.tableWrap td{padding:10px var(--s2);border-bottom:1px solid #eaefeb;text-align:left;font-size:var(--fs-2);vertical-align:top;min-width:0;max-width:100%;overflow-wrap:anywhere;word-break:normal}
+.tablewrap th,.tableWrap th{background:var(--surface-2);position:sticky;top:0;z-index:1;font-size:var(--fs-1);text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:750;white-space:normal;line-height:1.25}
+.tablewrap td>*,.tableWrap td>*{max-width:100%}
+.tablewrap td:last-child,.tableWrap td:last-child{min-width:96px}
+.tablewrap tbody tr:last-child td,.tableWrap tbody tr:last-child td{border-bottom:0}
+.tablewrap tbody tr:hover td,.tableWrap tbody tr:hover td{background:#fbfdfb}
+.tablewrap tr.bad>td,.tableWrap tr.bad>td{background:#fff7f6}
+.tablewrap table td.num,.tablewrap table th.num,.tableWrap table td.num,.tableWrap table th.num{text-align:right;font-variant-numeric:tabular-nums}
+.tablewrap .rowActs,.tableWrap .rowActs{min-width:0;justify-content:flex-start}
+.tablewrap .iconBtn,.tableWrap .iconBtn{flex:0 1 auto;line-height:1.1}
 
 /* ---------- modals / dialogs -------------------------------------------- */
 .modal{position:fixed;inset:0;background:rgba(12,22,16,.5);display:none;align-items:center;justify-content:center;padding:var(--s4);z-index:50}
@@ -306,6 +316,60 @@ tr.bad>td{background:#fff7f6}
 .assetPreview img{width:48px;height:48px;object-fit:contain;border:1px solid var(--line);border-radius:var(--r-sm);background:#fff;flex:none}
 .colorSwatch{width:46px;height:44px;padding:3px;flex:none}
 
+/* Convert crowded data grids into record cards before columns get hidden. */
+@media (max-width:1599px){
+  :where(.tablewrap.dense,.tableWrap.dense){border:0;background:transparent;overflow:visible;scrollbar-gutter:auto}
+  :where(.tablewrap.dense,.tableWrap.dense) table,
+  :where(.tablewrap.dense,.tableWrap.dense) thead,
+  :where(.tablewrap.dense,.tableWrap.dense) tbody,
+  :where(.tablewrap.dense,.tableWrap.dense) tr,
+  :where(.tablewrap.dense,.tableWrap.dense) th,
+  :where(.tablewrap.dense,.tableWrap.dense) td{display:block;width:auto}
+  :where(.tablewrap.dense,.tableWrap.dense) table{background:transparent}
+  :where(.tablewrap.dense,.tableWrap.dense) thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+  :where(.tablewrap.dense,.tableWrap.dense) tbody{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,430px),1fr));gap:var(--s3)}
+  :where(.tablewrap.dense,.tableWrap.dense) tbody tr{background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);padding:var(--s2) var(--s4) var(--s3);box-shadow:var(--sh-1);min-width:0}
+  :where(.tablewrap.dense,.tableWrap.dense) tbody tr.summary-row{grid-column:1/-1}
+  :where(.tablewrap.dense,.tableWrap.dense) tbody tr:hover td{background:transparent}
+  :where(.tablewrap.dense,.tableWrap.dense) td{border-bottom:1px solid #f0f4f1;padding:9px 0;display:grid;grid-template-columns:minmax(120px,35%) minmax(0,1fr);gap:var(--s3);align-items:start}
+  .tablewrap.dense td:last-child,.tableWrap.dense td:last-child{width:auto;min-width:0;border-bottom:0}
+  :where(.tablewrap.dense,.tableWrap.dense) td::before{content:attr(data-label);font-size:var(--fs-1);text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:750;line-height:1.25}
+  :where(.tablewrap.dense,.tableWrap.dense) td:not([data-label]){grid-template-columns:1fr}
+  :where(.tablewrap.dense,.tableWrap.dense) td[data-primary]{grid-template-columns:1fr;font-size:var(--fs-4);font-weight:750;padding-top:var(--s2)}
+  :where(.tablewrap.dense,.tableWrap.dense) td[data-primary]::before{display:none}
+  :where(.tablewrap.dense,.tableWrap.dense) td.tdEmpty,
+  :where(.tablewrap.dense,.tableWrap.dense) td[colspan]{grid-template-columns:1fr;text-align:left}
+  :where(.tablewrap.dense,.tableWrap.dense) td[colspan]::before{display:none}
+  :where(.tablewrap.dense,.tableWrap.dense) tr.bad{border-color:#e7b7b2;background:#fff7f6}
+  :where(.tablewrap.dense,.tableWrap.dense) tr.bad>td{background:transparent}
+}
+@media (max-width:1279px){
+  :where(.tablewrap.medium,.tableWrap.medium){border:0;background:transparent;overflow:visible;scrollbar-gutter:auto}
+  :where(.tablewrap.medium,.tableWrap.medium) table,
+  :where(.tablewrap.medium,.tableWrap.medium) thead,
+  :where(.tablewrap.medium,.tableWrap.medium) tbody,
+  :where(.tablewrap.medium,.tableWrap.medium) tr,
+  :where(.tablewrap.medium,.tableWrap.medium) th,
+  :where(.tablewrap.medium,.tableWrap.medium) td{display:block;width:auto}
+  :where(.tablewrap.medium,.tableWrap.medium) table{background:transparent}
+  :where(.tablewrap.medium,.tableWrap.medium) thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+  :where(.tablewrap.medium,.tableWrap.medium) tbody{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,430px),1fr));gap:var(--s3)}
+  :where(.tablewrap.medium,.tableWrap.medium) tbody tr{background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);padding:var(--s2) var(--s4) var(--s3);box-shadow:var(--sh-1);min-width:0}
+  :where(.tablewrap.medium,.tableWrap.medium) tbody tr.summary-row{grid-column:1/-1}
+  :where(.tablewrap.medium,.tableWrap.medium) tbody tr:hover td{background:transparent}
+  :where(.tablewrap.medium,.tableWrap.medium) td{border-bottom:1px solid #f0f4f1;padding:9px 0;display:grid;grid-template-columns:minmax(120px,35%) minmax(0,1fr);gap:var(--s3);align-items:start}
+  .tablewrap.medium td:last-child,.tableWrap.medium td:last-child{width:auto;min-width:0;border-bottom:0}
+  :where(.tablewrap.medium,.tableWrap.medium) td::before{content:attr(data-label);font-size:var(--fs-1);text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:750;line-height:1.25}
+  :where(.tablewrap.medium,.tableWrap.medium) td:not([data-label]){grid-template-columns:1fr}
+  :where(.tablewrap.medium,.tableWrap.medium) td[data-primary]{grid-template-columns:1fr;font-size:var(--fs-4);font-weight:750;padding-top:var(--s2)}
+  :where(.tablewrap.medium,.tableWrap.medium) td[data-primary]::before{display:none}
+  :where(.tablewrap.medium,.tableWrap.medium) td.tdEmpty,
+  :where(.tablewrap.medium,.tableWrap.medium) td[colspan]{grid-template-columns:1fr;text-align:left}
+  :where(.tablewrap.medium,.tableWrap.medium) td[colspan]::before{display:none}
+  :where(.tablewrap.medium,.tableWrap.medium) tr.bad{border-color:#e7b7b2;background:#fff7f6}
+  :where(.tablewrap.medium,.tableWrap.medium) tr.bad>td{background:transparent}
+}
+
 /* ======================= TABLET (768–1023px) ============================ */
 @media (max-width:1023px){
   :root{--nav-w:var(--rail-w)}
@@ -360,22 +424,24 @@ tr.bad>td{background:#fff7f6}
   .modalbox>*:not(.modalHead):not(.modalBody):not(.modalFoot){padding-left:var(--s4);padding-right:var(--s4)}
   .modalFoot{padding:var(--s3) var(--s4) calc(var(--s4) + env(safe-area-inset-bottom))}
 
-  /* dense tables become readable record cards; no data is dropped */
-  .tablewrap{border:0;background:transparent;overflow:visible}
-  .tablewrap table,.tablewrap thead,.tablewrap tbody,.tablewrap tr,.tablewrap th,.tablewrap td{display:block;width:auto}
-  .tablewrap thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
-  .tablewrap tbody tr{background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);padding:var(--s2) var(--s4) var(--s3);margin-bottom:var(--s3);box-shadow:var(--sh-1)}
-  .tablewrap tbody tr:hover td{background:transparent}
-  .tablewrap td{border-bottom:1px solid #f0f4f1;padding:9px 0;display:grid;grid-template-columns:minmax(38%,42%) minmax(0,1fr);gap:var(--s3);align-items:baseline}
-  .tablewrap td:last-child{border-bottom:0}
-  .tablewrap td::before{content:attr(data-label);font-size:var(--fs-1);text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:750}
-  .tablewrap td:not([data-label]){grid-template-columns:1fr}
-  .tablewrap td[data-primary]{grid-template-columns:1fr;font-size:var(--fs-4);font-weight:750;padding-top:var(--s2)}
-  .tablewrap td[data-primary]::before{display:none}
-  .tablewrap td.tdEmpty,.tablewrap td[colspan]{grid-template-columns:1fr;text-align:center}
-  .tablewrap td[colspan]::before{display:none}
-  .tablewrap tr.bad{border-color:#e7b7b2;background:#fff7f6}
-  .tablewrap tr.bad>td{background:transparent}
+  /* tables become readable record cards on mobile; no data is dropped */
+  :where(.tablewrap,.tableWrap){border:0;background:transparent;overflow:visible;scrollbar-gutter:auto}
+  :where(.tablewrap,.tableWrap) table,:where(.tablewrap,.tableWrap) thead,:where(.tablewrap,.tableWrap) tbody,:where(.tablewrap,.tableWrap) tr,:where(.tablewrap,.tableWrap) th,:where(.tablewrap,.tableWrap) td{display:block;width:auto}
+  :where(.tablewrap,.tableWrap) table{background:transparent}
+  :where(.tablewrap,.tableWrap) thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+  :where(.tablewrap,.tableWrap) tbody tr{background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);padding:var(--s2) var(--s4) var(--s3);margin-bottom:var(--s3);box-shadow:var(--sh-1);min-width:0}
+  :where(.tablewrap,.tableWrap) tbody tr.summary-row{grid-column:1/-1}
+  :where(.tablewrap,.tableWrap) tbody tr:hover td{background:transparent}
+  :where(.tablewrap,.tableWrap) td{border-bottom:1px solid #f0f4f1;padding:9px 0;display:grid;grid-template-columns:minmax(112px,38%) minmax(0,1fr);gap:var(--s3);align-items:start}
+  .tablewrap td:last-child,.tableWrap td:last-child{width:auto;min-width:0;border-bottom:0}
+  :where(.tablewrap,.tableWrap) td::before{content:attr(data-label);font-size:var(--fs-1);text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:750;line-height:1.25}
+  :where(.tablewrap,.tableWrap) td:not([data-label]){grid-template-columns:1fr}
+  :where(.tablewrap,.tableWrap) td[data-primary]{grid-template-columns:1fr;font-size:var(--fs-4);font-weight:750;padding-top:var(--s2)}
+  :where(.tablewrap,.tableWrap) td[data-primary]::before{display:none}
+  :where(.tablewrap,.tableWrap) td.tdEmpty,:where(.tablewrap,.tableWrap) td[colspan]{grid-template-columns:1fr;text-align:left}
+  :where(.tablewrap,.tableWrap) td[colspan]::before{display:none}
+  :where(.tablewrap,.tableWrap) tr.bad{border-color:#e7b7b2;background:#fff7f6}
+  :where(.tablewrap,.tableWrap) tr.bad>td{background:transparent}
   .rowActs{justify-content:flex-end}
   .rowActs .iconBtn{min-width:44px;min-height:44px}
   .treeRow{padding:11px 0}
@@ -559,7 +625,8 @@ let showArchived=false, expandedLots=new Set();
 async function load(){if(loadPromise)return loadPromise;loadPromise=(async()=>{try{[products,cash,sales,purchases,collections,reportCache,alerts]=await Promise.all([api('/products'+(showArchived?'?includeArchived=1':'')),api('/cash'),api('/sales'),api('/purchases'),api('/collections'),api('/reports?from=1900-01-01&to=2999-12-31'),api('/alerts')]);render();renderDashboard();renderAlerts();loadAnalytics(true).catch(()=>{});setSync('Synced');}catch(e){setSync('Offline / API error',true);throw e}finally{loadPromise=null}})();return loadPromise}
 function scheduleRealtimeRefresh(){clearTimeout(realtimeRefreshTimer);realtimeRefreshTimer=setTimeout(()=>load().catch(()=>{}),180)}
 function setSync(text,bad=false){$('syncStatus').textContent=text;$('syncStatus').className='status '+(bad?'bad':'ok')}
-function tab(headers,rows,empty='No records'){const lab=h=>String(h).replace(/<[^>]*>/g,'').replace(/"/g,'&quot;').trim();return `<div class="tablewrap"><table><thead><tr>${headers.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.length?rows.map(r=>`<tr>${r.map((x,i)=>`<td data-label="${lab(headers[i]||'')}"${i===0?' data-primary="1"':''}>${x}</td>`).join('')}</tr>`).join(''):`<tr><td colspan="${headers.length}" class="empty tdEmpty">${empty}</td></tr>`}</tbody></table></div>`}
+function tableWrapClass(headers){const n=headers.length;return `tablewrap${n>=9?' dense':n>=7?' medium':''}`}
+function tab(headers,rows,empty='No records'){const lab=h=>String(h).replace(/<[^>]*>/g,'').replace(/"/g,'&quot;').trim();return `<div class="${tableWrapClass(headers)}"><table><thead><tr>${headers.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.length?rows.map(r=>`<tr>${r.map((x,i)=>`<td data-label="${lab(headers[i]||'')}"${i===0?' data-primary="1"':''}>${x}</td>`).join('')}</tr>`).join(''):`<tr class="summary-row"><td colspan="${headers.length}" class="empty tdEmpty">${empty}</td></tr>`}</tbody></table></div>`}
 function render(){renderProducts();renderCash();renderSales();renderPurchases();renderCollections();$('saleProduct').innerHTML=products.map(p=>`<option value="${p.id}">${esc(p.name)} — stock ${num(p.stock_qty).toFixed(3)} ${esc(p.unit)}</option>`).join('');$('purchaseProduct').innerHTML=products.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join('');$('spoilageProduct').innerHTML=products.map(p=>`<option value="${p.id}">${esc(p.name)} — stock ${num(p.stock_qty).toFixed(3)} ${esc(p.unit)}</option>`).join('');$('collectionSale').innerHTML='<option value="">Unallocated collection</option>'+sales.filter(x=>String(x.payment_status).toLowerCase()!=='cash').map(x=>`<option value="${x.id}">Sale #${x.id} — ${esc(x.customer||'Customer')} — ${money(x.total)}</option>`).join('');$('saleProduct').onchange();$('purchaseProduct').onchange();$('spoilageProduct').onchange=renderSpoilageLots;renderSpoilageLots();
 
 const tx=[...cash.map(x=>({date:x.date,id:x.id,type:x.direction==='in'?'Cash In':'Cash Out',label:x.category,amount:x.amount,kind:'cash'})),...sales.map(x=>({date:x.date,id:x.id,type:'Sale',label:x.customer||'',amount:x.total,kind:'sale'})),...purchases.map(x=>({date:x.date,id:x.id,type:'Purchase',label:x.supplier||'',amount:x.total,kind:'purchase'})),...collections.map(x=>({date:x.date,id:x.id,type:'Collection',label:x.customer||'',amount:x.amount,kind:'collection'}))].sort((a,b)=>String(b.date).localeCompare(String(a.date))||b.id-a.id).slice(0,15);$('recent').innerHTML=tab(['Date','Type','Category / Party','Amount','Detail'],tx.map(x=>[esc(x.date),esc(x.type),esc(x.label),money(x.amount),`<button class="secondary small" onclick="openTransaction('${x.kind}',${x.id})">View</button>`]));
@@ -669,14 +736,21 @@ function drawPnlChart(){
    card layout (td::before) stays in sync with any table, including the
    hand-built ones. Presentation only — no data is changed. */
 function decorateTables(root=document){
-  root.querySelectorAll('.tablewrap table').forEach(t=>{
+  root.querySelectorAll('.tablewrap table,.tableWrap table').forEach(t=>{
     const hs=[...t.querySelectorAll('thead th')].map(th=>th.textContent.replace(/\s+/g,' ').trim());
+    const wrap=t.closest('.tablewrap,.tableWrap');
+    if(wrap){
+      wrap.classList.toggle('dense',hs.length>=9);
+      wrap.classList.toggle('medium',hs.length>=7&&hs.length<9);
+    }
     t.querySelectorAll('tbody tr').forEach(tr=>{
+      let isSummary=false;
       [...tr.children].forEach((td,i)=>{
-        if(td.hasAttribute('colspan')){td.classList.add('tdEmpty');return}
+        if(td.hasAttribute('colspan')){td.classList.add('tdEmpty');isSummary=true;return}
         if(hs[i]!==undefined&&hs[i]!=='')td.setAttribute('data-label',hs[i]);
         if(i===0&&hs[i])td.setAttribute('data-primary','1');
       });
+      tr.classList.toggle('summary-row',isSummary);
     });
   });
 }
@@ -735,7 +809,7 @@ function renderProducts(){
     const cells=productRow(p).map(x=>`<td>${x}</td>`).join('');
     return `<tr class="${p.expired_qty>0?'bad':''}">${cells}</tr>`+(expandedLots.has(p.id)?lotDrawer(p):'');
   }).join('');
-  $('productTable').innerHTML=`<div class="tablewrap"><table><thead><tr>${headers.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${body||`<tr><td colspan="${headers.length}" class="empty">No products</td></tr>`}</tbody></table></div>`;
+  $('productTable').innerHTML=`<div class="${tableWrapClass(headers)}"><table><thead><tr>${headers.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${body||`<tr class="summary-row"><td colspan="${headers.length}" class="empty">No products</td></tr>`}</tbody></table></div>`;
 }
 function toggleLots(id){expandedLots.has(id)?expandedLots.delete(id):expandedLots.add(id);renderProducts()}
 function toggleArchived(){showArchived=!showArchived;$('archToggleBtn').textContent=showArchived?'Hide Archived':'Show Archived';load()}
@@ -803,7 +877,7 @@ async function recordSpoilage(){const btn=$('spoilageBtn');btn.disabled=true;try
 let currentStocktake=null;
 async function recordStocktake(){try{const r=await api('/inventory/stocktake',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({date:$('stockDate').value,notes:$('stockNotes').value})});$('stockResult').textContent=`Snapshot #${r.id}: ${r.items} products • System inventory value ${money(r.total_value)}`;currentStocktake=r.id;await loadStocktakeCount(r.id);showToast('Stocktake snapshot saved. Enter the counted quantities below.')}catch(e){showToast(e.message,true)}}
 async function loadStocktakeCount(id){try{const r=await api('/inventory/stocktake/'+id);const rows=r.items.map(x=>`<tr><td>${esc(x.product_name||('#'+x.product_id))}</td><td>${Number(x.system_qty).toFixed(3)} ${esc(x.unit||'')}</td><td><input data-stocktake-product="${x.product_id}" type="number" min="0" step=".001" value="${x.counted_qty===null?'':Number(x.counted_qty).toFixed(3)}" style="max-width:120px"></td><td>${x.variance_qty===null?'—':Number(x.variance_qty).toFixed(3)}</td><td>${x.variance_value===null?'—':money(x.variance_value)}</td></tr>`).join('');
-  $('stocktakeCount').innerHTML=`<h4 style="margin:6px 0">Physical Count — Stocktake #${id} (${esc(r.stocktake.date)})</h4><div class="tableWrap"><table><thead><tr><th>Product</th><th>System Qty</th><th>Counted Qty</th><th>Variance</th><th>Variance Value</th></tr></thead><tbody>${rows}</tbody></table></div><div class="row" style="margin-top:8px"><button class="primary" onclick="submitStocktakeCount(${id})">Save Counted Quantities</button></div><div class="muted" style="margin-top:6px">${esc(r.formula)}</div>`;
+  $('stocktakeCount').innerHTML=`<h4 style="margin:6px 0">Physical Count — Stocktake #${id} (${esc(r.stocktake.date)})</h4><div class="tablewrap"><table><thead><tr><th>Product</th><th>System Qty</th><th>Counted Qty</th><th>Variance</th><th>Variance Value</th></tr></thead><tbody>${rows}</tbody></table></div><div class="row" style="margin-top:8px"><button class="primary" onclick="submitStocktakeCount(${id})">Save Counted Quantities</button></div><div class="muted" style="margin-top:6px">${esc(r.formula)}</div>`;
 }catch(e){showToast(e.message,true)}}
 async function submitStocktakeCount(id){try{const items=[...document.querySelectorAll('[data-stocktake-product]')].filter(i=>String(i.value).trim()!=='').map(i=>({product_id:Number(i.dataset.stocktakeProduct),counted_qty:Number(i.value)}));
   if(!items.length)return showToast('Enter at least one counted quantity.',true);
