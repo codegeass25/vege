@@ -413,6 +413,137 @@ tr.bad>td{background:#fff7f6}
   #sidebar:hover #sidebarBrand,#sidebar:focus-within #sidebarBrand{justify-content:flex-start;padding:2px var(--s2) var(--s3)}
 }
 @media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+
+/* ======================= DESKTOP / LAPTOP (>=1024px) ====================
+   Everything below is desktop-only polish. Mobile (<=767px) and tablet
+   (768-1023px) behaviour is untouched by design.
+   ======================================================================== */
+:root{--ease:cubic-bezier(.2,.7,.3,1);--dur-1:.12s;--dur-2:.18s;--dur-3:.24s}
+
+/* shared desktop components (safe at every width) */
+.toolbar{display:flex;gap:var(--s2);flex-wrap:wrap;align-items:center}
+.setTabs{display:none}
+.setPane{display:block}
+.setPane+.setPane{margin-top:var(--s4)}
+
+@media (min-width:1024px){
+  main{padding:var(--s6) var(--s7) var(--s8);padding-left:calc(var(--nav-w) + var(--s7));transition:padding-left var(--dur-3) var(--ease)}
+  .page.active{max-width:1480px;animation:pageIn var(--dur-3) var(--ease)}
+  @keyframes pageIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+  /* ---- header ---- */
+  header{padding:0 var(--s6) 0 calc(var(--nav-w) + var(--s6));transition:padding-left var(--dur-3) var(--ease)}
+  header h1{font-size:var(--fs-5);max-width:44ch}
+  .sub{max-width:60ch}
+  .headActs,header .top>div:last-child{gap:var(--s3)}
+  .logout{min-height:38px;padding:8px 14px;border-radius:var(--r-md)}
+  #syncStatus{padding:6px 12px}
+
+  /* ---- sidebar ---- */
+  #sidebar{padding:var(--s5) var(--s3) var(--s4);gap:var(--s4);background:var(--card)}
+  #sidebarBrand{gap:var(--s3);padding:0 var(--s2) var(--s4)}
+  .navCollapse{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;flex:none;border:1px solid var(--line);background:var(--card);color:var(--muted);border-radius:var(--r-sm);cursor:pointer;font-size:14px;transition:background var(--dur-1) var(--ease),color var(--dur-1) var(--ease),border-color var(--dur-1) var(--ease)}
+  .navCollapse:hover{background:var(--surface-3);color:var(--ink);border-color:#a8c2b2}
+  nav{gap:1px}
+  .navGroup{padding:var(--s4) var(--s3) 6px}
+  nav button{position:relative;min-height:38px;padding:8px var(--s3);font-size:var(--fs-2);font-weight:700;transition:background var(--dur-1) var(--ease),color var(--dur-1) var(--ease),transform var(--dur-1) var(--ease)}
+  nav button:hover{background:var(--surface-3);transform:translateX(1px)}
+  nav button.active{background:var(--tint-2);color:var(--g2);box-shadow:none}
+  nav button.active::before{content:"";position:absolute;left:0;top:8px;bottom:8px;width:3px;border-radius:0 3px 3px 0;background:var(--g)}
+  nav button.active .navIcon{color:var(--g)}
+  .sidebarFooter{padding:var(--s3) var(--s2) 0}
+
+  /* collapsed desktop rail */
+  body.navRail{--nav-w:var(--rail-w)}
+  body.navRail #sidebar{width:var(--rail-w);padding-left:10px;padding-right:10px}
+  body.navRail #sidebarBrandText,body.navRail .navLabel,body.navRail .sidebarFooter,body.navRail .navGroup{display:none}
+  body.navRail #sidebarBrand{justify-content:center;padding:0 0 var(--s3)}
+  body.navRail nav button{justify-content:center;padding:10px 0}
+  body.navRail .navCollapse{position:absolute;top:var(--s5);right:-14px;background:var(--card);box-shadow:var(--sh-1);transform:rotate(180deg)}
+
+  /* ---- page head + sections ---- */
+  .pageHead{margin-bottom:var(--s6);padding-bottom:var(--s4);border-bottom:1px solid var(--line);align-items:end}
+  .pageHead h2{font-size:var(--fs-6)}
+  .pageHead .pageSub{font-size:var(--fs-2);max-width:86ch}
+  .section{margin-top:var(--s6)}
+  .card{padding:var(--s6);transition:border-color var(--dur-2) var(--ease),box-shadow var(--dur-2) var(--ease)}
+  .grid{gap:var(--s5)}
+
+  /* ---- toolbars / filters ---- */
+  .toolbar{gap:var(--s2);padding:0;margin:0 0 var(--s4)}
+  .filterCard{padding:var(--s4) var(--s5)}
+  .filterRow{grid-template-columns:repeat(auto-fit,minmax(180px,220px));justify-content:start}
+  .filterRow>button{align-self:end}
+
+  /* ---- forms: size fields to content, not all equal ---- */
+  .row{grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:var(--s4) var(--s5)}
+  .row>button,.row>label.secondary{align-self:end}
+  input[type=date],input[type=time],input[type=number]{max-width:100%}
+  .field:has(>input[type=date]),.field:has(>input[type=number]){max-width:280px}
+  input,select,textarea{min-height:40px;padding:9px 12px;transition:border-color var(--dur-1) var(--ease),box-shadow var(--dur-1) var(--ease)}
+  input:hover,select:hover,textarea:hover{border-color:#b3c6ba}
+  .primary,.secondary,.danger{min-height:40px;padding:9px 16px}
+
+  /* ---- stats / dashboard ---- */
+  .statStrip{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .stat{padding:var(--s5) var(--s5) var(--s4);transition:background var(--dur-2) var(--ease)}
+  .stat:hover{background:var(--surface-2)}
+  .analytics{padding:var(--s6)}
+  .chartBox{height:clamp(280px,26vw,380px)}
+  .reportCard,.reportSubCard{transition:transform var(--dur-2) var(--ease),box-shadow var(--dur-2) var(--ease),border-color var(--dur-2) var(--ease)}
+
+  /* ---- tables: denser, scannable ---- */
+  th,td{padding:9px var(--s4)}
+  th{font-size:10.5px}
+  tbody tr{transition:background var(--dur-1) var(--ease)}
+  tbody tr:hover td{background:var(--surface-2)}
+  td .rowActs{justify-content:flex-end;flex-wrap:nowrap}
+  .tablewrap td .iconBtn{min-height:32px;min-width:32px}
+  .tablewrap table td:last-child,.tablewrap table th:last-child{text-align:right}
+  .rowInput{min-height:34px}
+
+  /* ---- modals ---- */
+  .modal{padding:var(--s7)}
+  .modalbox{max-width:1040px;border-radius:var(--r-lg);animation:modalIn var(--dur-2) var(--ease)}
+  .modalbox.sm{max-width:560px}
+  @keyframes modalIn{from{opacity:0;transform:translateY(8px) scale(.99)}to{opacity:1;transform:none}}
+  .modalHead{padding:var(--s5) var(--s6) var(--s4)}
+  .modalBody{padding:var(--s5) var(--s6)}
+  .modalFoot{padding:var(--s4) var(--s6) var(--s5)}
+
+  /* ---- settings tab workspace ---- */
+  .setTabs{display:flex;gap:var(--s1);border-bottom:1px solid var(--line);margin-bottom:var(--s5);flex-wrap:wrap}
+  .setTab{border:0;background:transparent;padding:10px var(--s4);font-weight:700;font-size:var(--fs-2);color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;min-height:42px;border-radius:var(--r-sm) var(--r-sm) 0 0;transition:color var(--dur-1) var(--ease),background var(--dur-1) var(--ease),border-color var(--dur-1) var(--ease)}
+  .setTab:hover{color:var(--ink);background:var(--surface-2)}
+  .setTab.active{color:var(--g2);border-bottom-color:var(--g)}
+  .setTab.danger{background:transparent;border:0;border-bottom:2px solid transparent;color:#96241d}
+  .setTab.danger:hover{background:#fdeceb}
+  .setTab.danger.active{border-bottom-color:var(--danger)}
+  .setPanes{display:block}
+  .setPane{display:none}
+  .setPane.active{display:block;animation:paneIn var(--dur-2) var(--ease)}
+  @keyframes paneIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+  .setPane .card+.card{margin-top:var(--s5)}
+
+  /* ---- toast ---- */
+  .toast{animation:toastIn var(--dur-2) var(--ease)}
+  @keyframes toastIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+}
+
+@media (min-width:1600px){
+  main{padding-left:calc(var(--nav-w) + var(--s8));padding-right:var(--s8)}
+  .page.active{max-width:1680px}
+}
+@media (max-width:1023px){
+  .navCollapse{display:none}
+  .setTabs{display:none!important}
+  .setPane{display:block!important}
+}
+@media (prefers-reduced-motion:reduce){
+  .page.active,.modalbox,.setPane.active,.toast{animation:none!important}
+  nav button:hover{transform:none}
+}
+
 @media print{#sidebar,#mobileNav,header,.pageActs{display:none!important}main{padding:0!important}}
 </style>
 <script src="./vendor/chart.umd.js" defer></script>
@@ -421,7 +552,7 @@ tr.bad>td{background:#fff7f6}
 <div id="brandSplash" class="brandSplash"><div class="brandSplashBox"><img id="splashLogo" alt="Company logo"><div id="splashTitle" class="brandSplashTitle">Loading…</div><div class="muted" style="margin-top:6px">Loading system…</div></div></div><div id="auth" class="auth"><form class="authbox" onsubmit="return doLogin(event)"><img id="loginLogo" alt="Company logo" style="display:none;width:70px;height:70px;object-fit:contain;border-radius:14px;margin-bottom:12px"><h2 id="loginTitle" style="margin-top:0">Owner Login</h2><p id="loginTagline" class="muted">Please sign in to continue.</p><div class="field"><label>Owner Password</label><input id="loginPassword" type="password" autocomplete="current-password" required></div><button class="primary" style="width:100%;margin-top:14px">Sign In</button><button id="authInstallAppBtn" type="button" class="secondary hidden" style="width:100%;margin-top:8px" onclick="installPwa()">Install App</button><div id="installHelp" class="muted hidden" style="margin-top:8px;line-height:1.45"></div><div id="loginError" class="notice bad hidden" style="margin-top:12px"></div></form></div>
 <div id="installGuide" class="modal" onclick="if(event.target===this)closeInstallGuide()"><div class="modalbox sm"><div class="modalHead"><h3 id="installGuideTitle" style="margin:0">Install App</h3><button class="close" type="button" onclick="closeInstallGuide()">Close</button></div><ol id="installGuideSteps" style="margin:14px 0 0;padding-left:20px;line-height:1.5"></ol><div class="muted" style="margin-top:12px">Once installed, the app opens in its own window with its own icon.</div></div></div>
 <header id="appHeader" class="hidden"><div class="top"><div style="display:flex;gap:10px;align-items:center"><button class="sidebarToggle" onclick="toggleSidebar()" aria-label="Open menu">☰</button><img id="headerLogo" alt="Company logo" style="display:none;width:42px;height:42px;object-fit:contain;border-radius:10px;background:#ffffff22"><div><h1 id="appTitle">Business Manager</h1><div id="appSubtitle" class="sub">Loading application…</div></div></div><div style="display:flex;align-items:center;gap:8px"><button id="installAppBtn" class="logout hidden" onclick="installPwa()">Install App</button><span id="syncStatus" class="status">Connecting…</span><button class="logout" onclick="logout()">Logout</button></div></div></header>
-<aside id="sidebar" class="hidden"><div id="sidebarBrand"><img id="sidebarLogo" alt="Company logo"><div id="sidebarBrandText"><div id="sidebarBrandName">Business Manager</div><div id="sidebarBrandSub">Business Manager</div></div></div><nav id="nav"></nav><div class="sidebarFooter">Install this system as an app from your browser for a cleaner desktop/mobile experience.</div></aside><div id="sidebarOverlay" onclick="closeSidebar()"></div>
+<aside id="sidebar" class="hidden"><div id="sidebarBrand"><img id="sidebarLogo" alt="Company logo"><div id="sidebarBrandText"><div id="sidebarBrandName">Business Manager</div><div id="sidebarBrandSub">Business Manager</div></div><button id="navCollapseBtn" type="button" class="navCollapse" onclick="toggleDeskNav()" aria-label="Collapse navigation" title="Collapse navigation">&#8676;</button></div><nav id="nav"></nav><div class="sidebarFooter">Install this system as an app from your browser for a cleaner desktop/mobile experience.</div></aside><div id="sidebarOverlay" onclick="closeSidebar()"></div>
 <nav id="mobileNav" class="hidden" aria-label="Primary"></nav>
 <div id="moreSheet" class="sheet" onclick="if(event.target===this||event.target.classList.contains('sheetBackdrop'))closeMoreSheet()"><div class="sheetBackdrop"></div><div class="sheetBox" role="dialog" aria-label="More sections"><div class="sheetHead"><h3>All sections</h3><button class="close" type="button" onclick="closeMoreSheet()">Close</button></div><div class="sheetGrid" id="moreSheetGrid"></div></div></div>
 <main id="appMain" class="hidden">
@@ -433,16 +564,23 @@ tr.bad>td{background:#fff7f6}
 <div class="section" id="alertPanel"></div>
 <div class="section"><div class="card"><h3>Recent Business Activity</h3><div class="vb-info">Latest recorded business events. “View” shows the source transaction and its accounting effect; loan records also show liquidation/allocation and summary.</div><div id="recent" style="margin-top:12px"></div></div></div>
 </section>
-<section id="cash" class="page"><h2>Cash Transactions</h2><div class="notice">Use Sales, Purchases and Collections modules for linked business events. Manual cash is for legitimate items such as expenses, owner capital, loans, drawings and other cash movements.</div><div class="card"><div class="row"><div class="field"><label>Date</label><input id="cashDate" type="date"></div><div class="field"><label>Direction</label><select id="cashDir"><option value="in">Cash In</option><option value="out">Cash Out</option></select></div><div class="field"><label>Business Cash Type</label><div class="cashSelect" id="cashCatWrap"><input id="cashCat" type="hidden"><button type="button" class="cashSelectBtn" id="cashCatBtn" aria-haspopup="listbox" aria-expanded="false">Select category <span>▾</span></button><div class="cashSelectMenu" id="cashCatMenu" role="listbox"></div></div></div><div class="field"><label>Amount</label><input id="cashAmt" type="number" min="0" step=".01"></div><div class="field"><label>Description / Reference</label><input id="cashDesc" maxlength="500"></div><button id="cashSaveBtn" class="primary" onclick="saveCash()">Save</button></div></div><div class="card" style="margin-top:12px"><div id="cashTable"></div></div></section>
-<section id="inventory" class="page"><h2>Inventory</h2><div class="actions"><button class="primary" onclick="openProduct()">+ Add Product</button><button class="secondary" onclick="downloadPath('/products/template')">⬇ Product Template</button><label class="secondary">⬆ Import Products <input id="importFile" type="file" accept=".xlsx,.xls,.csv" hidden></label><button class="secondary" onclick="downloadPath('/inventory/lots/template')">⬇ Stock-In / Lot Template</button><label class="secondary">⬆ Import Stock-In Lots <input id="lotImportFile" type="file" accept=".xlsx,.xls,.csv" hidden></label><button class="secondary" onclick="toggleArchived()" id="archToggleBtn">Show Archived</button><button class="secondary" onclick="openReport('inventory')">Detailed Inventory Valuation</button></div><div class="notice">Inventory uses historical transaction costs and weighted-average costing for new purchases and sales. Inventory value is traceable to the movement ledger.<div class="dashboardExplain"><b>Expiry is tracked per lot / batch,</b> never on the product master. Sales consume stock <b>FEFO (First Expire, First Out)</b>, and expired lots are blocked from sales until they are processed as spoilage. Click a product row’s <b>Lots</b> button to see every batch, its expiry date and its status.</div></div><div class="card"><div id="productTable"></div></div><div class="card" style="margin-top:12px"><h3>System Stocktake Snapshot</h3><div class="row"><div class="field"><label>As of</label><input id="stockDate" type="date"></div><div class="field"><label>Notes</label><input id="stockNotes"></div><button class="primary" onclick="recordStocktake()">Save Stocktake Snapshot</button></div><div id="stockResult" class="muted" style="margin-top:8px"></div><div class="vb-info" style="margin-top:8px">Ang snapshot mo-record sa system quantity. I-butang ang <b>actual nga na-count</b> sa ubos aron ma-reconcile ang physical stock ug automatic nga mag-post ang variance adjustment.</div><div id="stocktakeCount" style="margin-top:10px"></div></div><div class="card" style="margin-top:12px"><h3>Spoilage / Wastage</h3><div class="vb-info">Kung madaot, malata, malaya, o dili na baligya ang prutas/gulay, i-record diri. Ang system mo-minus sa inventory gamit ang weighted-average cost ug mo-record og separate Spoilage / Wastage Expense.</div><div class="row" style="margin-top:10px"><div class="field"><label>Date</label><input id="spoilageDate" type="date"></div><div class="field"><label>Product</label><select id="spoilageProduct"></select></div><div class="field"><label>Lot / Batch</label><select id="spoilageLot"><option value="">Automatic (expired first, then FEFO)</option></select></div><div class="field"><label>Spoiled Quantity</label><input id="spoilageQty" type="number" min="0.001" step=".001"></div><div class="field"><label>Reason</label><input id="spoilageReason" maxlength="200" placeholder="Rotten, overripe, damaged, etc."></div><button id="spoilageBtn" class="danger" onclick="recordSpoilage()">Record Spoilage</button><button id="spoilExpiredBtn" class="secondary" onclick="processExpired()">Process All Expired Lots</button></div><div id="spoilageLotHint" class="vb-info" style="margin-top:8px"></div><div class="vb-info">Ang spoilage dili i-count as sales ug dili pud siya i-add sa cash outflow. Inventory loss siya nga na-convert ngadto sa Spoilage / Wastage Expense.</div></div></section>
-<section id="sales" class="page"><h2>Sales</h2><div class="card"><div class="row"><div class="field"><label>Date</label><input id="saleDate" type="date"></div><div class="field"><label>Customer</label><input id="saleCustomer"></div><div class="field"><label>Product</label><select id="saleProduct"></select></div><div class="field"><label>Quantity</label><input id="saleQty" type="number" min="0.001" step=".001"></div><div class="field"><label>Selling Price / Unit</label><input id="salePrice" type="number" min="0.01" step=".01"></div><div class="field"><label>Discount</label><input id="saleDiscount" type="number" min="0" step=".01" value="0"></div><div class="field"><label>Payment</label><select id="saleStatus"><option>Credit</option><option>Cash</option></select></div><button id="saleBtn" class="primary" onclick="saveSale()">Record Sale</button></div></div><div class="card" style="margin-top:12px"><div id="salesTable"></div></div></section>
-<section id="purchases" class="page"><h2>Purchases</h2><div class="card"><div class="row"><div class="field"><label>Date</label><input id="purchaseDate" type="date"></div><div class="field"><label>Supplier</label><input id="purchaseSupplier"></div><div class="field"><label>Product</label><select id="purchaseProduct"></select></div><div class="field"><label>Quantity</label><input id="purchaseQty" type="number" min="0.001" step=".001"></div><div class="field"><label>Actual Unit Cost</label><input id="purchaseCost" type="number" min="0.01" step=".01"></div><div class="field"><label>Lot / Batch Code</label><input id="purchaseLot" maxlength="60"></div><div class="field"><label>Expiry Date</label><input id="purchaseExpiry" type="date"></div><div class="field"><label>Payment</label><select id="purchaseStatus"><option>Credit</option><option>Cash</option></select></div><button id="purchaseBtn" class="primary" onclick="savePurchase()">Record Purchase</button></div></div><div class="card" style="margin-top:12px"><div id="purchaseTable"></div></div></section>
-<section id="collections" class="page"><h2>Customer Collections / Receivables</h2><div class="notice">A collection reduces Accounts Receivable; it does NOT create new revenue. Link a collection to an actual credit sale whenever possible.</div><div class="card"><div class="row"><div class="field"><label>Date</label><input id="collectionDate" type="date"></div><div class="field"><label>Customer</label><input id="collectionCustomer"></div><div class="field"><label>Credit Sale / Invoice</label><select id="collectionSale"></select></div><div class="field"><label>Amount</label><input id="collectionAmount" type="number" min="0.01" step=".01"></div><div class="field"><label>Reference</label><input id="collectionRef"></div><button class="primary" onclick="saveCollection()">Record Collection</button></div></div><div class="card" style="margin-top:12px"><div id="collectionTable"></div></div></section>
-<section id="reports" class="page"><h2>Detailed Financial Reports</h2><div class="card"><div class="row"><div class="field"><label>Period</label><select id="period"><option value="day">Day</option><option value="week">Week</option><option value="month" selected>Month</option><option value="year">Year</option><option value="custom">Custom Date Range</option></select></div><div class="field"><label>From / As-of</label><input id="fromDate" type="date"></div><div class="field"><label>To</label><input id="toDate" type="date"></div><button class="secondary" onclick="applyReportPeriod()">Apply</button><button class="primary" onclick="downloadReport()">⬇ Download Detailed Excel</button></div></div><div class="notice"><b>Every major figure below is clickable.</b> Follow <b>Summary → Category → Transaction → Source Record</b> to understand exactly where the number came from.<div class="vb-info">Dili lang ni consolidated total. I-click ang amount para ma-trace nimo ang actual sales, purchases, collections, expenses, inventory movements, ug spoilage.</div></div><div id="reportCards" class="grid"></div></section>
-<section id="settings" class="page"><h2>Settings</h2>
-<div class="grid">
+<section id="cash" class="page"><div class="pageHead"><div><h2>Cash Transactions</h2><div class="pageSub">Record manual cash movements — expenses, owner capital, loans and drawings — outside the linked sales, purchase and collection modules.</div></div></div><div class="notice">Use Sales, Purchases and Collections modules for linked business events. Manual cash is for legitimate items such as expenses, owner capital, loans, drawings and other cash movements.</div><div class="card"><div class="row"><div class="field"><label>Date</label><input id="cashDate" type="date"></div><div class="field"><label>Direction</label><select id="cashDir"><option value="in">Cash In</option><option value="out">Cash Out</option></select></div><div class="field"><label>Business Cash Type</label><div class="cashSelect" id="cashCatWrap"><input id="cashCat" type="hidden"><button type="button" class="cashSelectBtn" id="cashCatBtn" aria-haspopup="listbox" aria-expanded="false">Select category <span>▾</span></button><div class="cashSelectMenu" id="cashCatMenu" role="listbox"></div></div></div><div class="field"><label>Amount</label><input id="cashAmt" type="number" min="0" step=".01"></div><div class="field"><label>Description / Reference</label><input id="cashDesc" maxlength="500"></div><button id="cashSaveBtn" class="primary" onclick="saveCash()">Save</button></div></div><div class="card" style="margin-top:12px"><div id="cashTable"></div></div></section>
+<section id="inventory" class="page"><div class="pageHead"><div><h2>Inventory</h2><div class="pageSub">Products, lot-level stock and expiry, stocktake snapshots and spoilage, valued at weighted-average cost.</div></div></div><div class="actions toolbar"><button class="primary" onclick="openProduct()">+ Add Product</button><button class="secondary" onclick="downloadPath('/products/template')">⬇ Product Template</button><label class="secondary">⬆ Import Products <input id="importFile" type="file" accept=".xlsx,.xls,.csv" hidden></label><button class="secondary" onclick="downloadPath('/inventory/lots/template')">⬇ Stock-In / Lot Template</button><label class="secondary">⬆ Import Stock-In Lots <input id="lotImportFile" type="file" accept=".xlsx,.xls,.csv" hidden></label><button class="secondary" onclick="toggleArchived()" id="archToggleBtn">Show Archived</button><button class="secondary" onclick="openReport('inventory')">Detailed Inventory Valuation</button></div><div class="notice">Inventory uses historical transaction costs and weighted-average costing for new purchases and sales. Inventory value is traceable to the movement ledger.<div class="dashboardExplain"><b>Expiry is tracked per lot / batch,</b> never on the product master. Sales consume stock <b>FEFO (First Expire, First Out)</b>, and expired lots are blocked from sales until they are processed as spoilage. Click a product row’s <b>Lots</b> button to see every batch, its expiry date and its status.</div></div><div class="card"><div id="productTable"></div></div><div class="card" style="margin-top:12px"><h3>System Stocktake Snapshot</h3><div class="row"><div class="field"><label>As of</label><input id="stockDate" type="date"></div><div class="field"><label>Notes</label><input id="stockNotes"></div><button class="primary" onclick="recordStocktake()">Save Stocktake Snapshot</button></div><div id="stockResult" class="muted" style="margin-top:8px"></div><div class="vb-info" style="margin-top:8px">Ang snapshot mo-record sa system quantity. I-butang ang <b>actual nga na-count</b> sa ubos aron ma-reconcile ang physical stock ug automatic nga mag-post ang variance adjustment.</div><div id="stocktakeCount" style="margin-top:10px"></div></div><div class="card" style="margin-top:12px"><h3>Spoilage / Wastage</h3><div class="vb-info">Kung madaot, malata, malaya, o dili na baligya ang prutas/gulay, i-record diri. Ang system mo-minus sa inventory gamit ang weighted-average cost ug mo-record og separate Spoilage / Wastage Expense.</div><div class="row" style="margin-top:10px"><div class="field"><label>Date</label><input id="spoilageDate" type="date"></div><div class="field"><label>Product</label><select id="spoilageProduct"></select></div><div class="field"><label>Lot / Batch</label><select id="spoilageLot"><option value="">Automatic (expired first, then FEFO)</option></select></div><div class="field"><label>Spoiled Quantity</label><input id="spoilageQty" type="number" min="0.001" step=".001"></div><div class="field"><label>Reason</label><input id="spoilageReason" maxlength="200" placeholder="Rotten, overripe, damaged, etc."></div><button id="spoilageBtn" class="danger" onclick="recordSpoilage()">Record Spoilage</button><button id="spoilExpiredBtn" class="secondary" onclick="processExpired()">Process All Expired Lots</button></div><div id="spoilageLotHint" class="vb-info" style="margin-top:8px"></div><div class="vb-info">Ang spoilage dili i-count as sales ug dili pud siya i-add sa cash outflow. Inventory loss siya nga na-convert ngadto sa Spoilage / Wastage Expense.</div></div></section>
+<section id="sales" class="page"><div class="pageHead"><div><h2>Sales</h2><div class="pageSub">Record cash and credit sales. Stock is consumed first-expire-first-out and posted to the books automatically.</div></div></div><div class="card"><div class="row"><div class="field"><label>Date</label><input id="saleDate" type="date"></div><div class="field"><label>Customer</label><input id="saleCustomer"></div><div class="field"><label>Product</label><select id="saleProduct"></select></div><div class="field"><label>Quantity</label><input id="saleQty" type="number" min="0.001" step=".001"></div><div class="field"><label>Selling Price / Unit</label><input id="salePrice" type="number" min="0.01" step=".01"></div><div class="field"><label>Discount</label><input id="saleDiscount" type="number" min="0" step=".01" value="0"></div><div class="field"><label>Payment</label><select id="saleStatus"><option>Credit</option><option>Cash</option></select></div><button id="saleBtn" class="primary" onclick="saveSale()">Record Sale</button></div></div><div class="card" style="margin-top:12px"><div id="salesTable"></div></div></section>
+<section id="purchases" class="page"><div class="pageHead"><div><h2>Purchases</h2><div class="pageSub">Record supplier purchases with lot code and expiry so inventory costing and expiry tracking stay accurate.</div></div></div><div class="card"><div class="row"><div class="field"><label>Date</label><input id="purchaseDate" type="date"></div><div class="field"><label>Supplier</label><input id="purchaseSupplier"></div><div class="field"><label>Product</label><select id="purchaseProduct"></select></div><div class="field"><label>Quantity</label><input id="purchaseQty" type="number" min="0.001" step=".001"></div><div class="field"><label>Actual Unit Cost</label><input id="purchaseCost" type="number" min="0.01" step=".01"></div><div class="field"><label>Lot / Batch Code</label><input id="purchaseLot" maxlength="60"></div><div class="field"><label>Expiry Date</label><input id="purchaseExpiry" type="date"></div><div class="field"><label>Payment</label><select id="purchaseStatus"><option>Credit</option><option>Cash</option></select></div><button id="purchaseBtn" class="primary" onclick="savePurchase()">Record Purchase</button></div></div><div class="card" style="margin-top:12px"><div id="purchaseTable"></div></div></section>
+<section id="collections" class="page"><div class="pageHead"><div><h2>Customer Collections / Receivables</h2><div class="pageSub">Apply customer payments against credit sales. Collections reduce Accounts Receivable and never create new revenue.</div></div></div><div class="notice">A collection reduces Accounts Receivable; it does NOT create new revenue. Link a collection to an actual credit sale whenever possible.</div><div class="card"><div class="row"><div class="field"><label>Date</label><input id="collectionDate" type="date"></div><div class="field"><label>Customer</label><input id="collectionCustomer"></div><div class="field"><label>Credit Sale / Invoice</label><select id="collectionSale"></select></div><div class="field"><label>Amount</label><input id="collectionAmount" type="number" min="0.01" step=".01"></div><div class="field"><label>Reference</label><input id="collectionRef"></div><button class="primary" onclick="saveCollection()">Record Collection</button></div></div><div class="card" style="margin-top:12px"><div id="collectionTable"></div></div></section>
+<section id="reports" class="page"><div class="pageHead"><div><h2>Detailed Financial Reports</h2><div class="pageSub">Income Statement, Cash Flow, Balance Sheet and supporting schedules — every figure is traceable to its source record.</div></div></div><div class="card filterCard"><div class="row filterRow"><div class="field"><label>Period</label><select id="period"><option value="day">Day</option><option value="week">Week</option><option value="month" selected>Month</option><option value="year">Year</option><option value="custom">Custom Date Range</option></select></div><div class="field"><label>From / As-of</label><input id="fromDate" type="date"></div><div class="field"><label>To</label><input id="toDate" type="date"></div><button class="secondary" onclick="applyReportPeriod()">Apply</button><button class="primary" onclick="downloadReport()">⬇ Download Detailed Excel</button></div></div><div class="notice"><b>Every major figure below is clickable.</b> Follow <b>Summary → Category → Transaction → Source Record</b> to understand exactly where the number came from.<div class="vb-info">Dili lang ni consolidated total. I-click ang amount para ma-trace nimo ang actual sales, purchases, collections, expenses, inventory movements, ug spoilage.</div></div><div id="reportCards" class="grid"></div></section>
+<section id="settings" class="page">
+<div class="pageHead"><div><h2>Settings</h2><div class="pageSub">Branding, receipts, owner SMS alerts, backups and system maintenance for this installation.</div></div></div>
+<div class="setTabs" id="settingsTabs" role="tablist" aria-label="Settings sections"><button type="button" role="tab" id="setTab-general" class="setTab active" aria-selected="true" aria-controls="setPane-general" tabindex="0" data-settab="general" onclick="settingsTab('general')">General & Branding</button><button type="button" role="tab" id="setTab-receipt" class="setTab" aria-selected="false" aria-controls="setPane-receipt" tabindex="-1" data-settab="receipt" onclick="settingsTab('receipt')">Receipt</button><button type="button" role="tab" id="setTab-sms" class="setTab" aria-selected="false" aria-controls="setPane-sms" tabindex="-1" data-settab="sms" onclick="settingsTab('sms')">SMS Alerts</button><button type="button" role="tab" id="setTab-smslog" class="setTab" aria-selected="false" aria-controls="setPane-smslog" tabindex="-1" data-settab="smslog" onclick="settingsTab('smslog')">SMS History</button><button type="button" role="tab" id="setTab-backup" class="setTab" aria-selected="false" aria-controls="setPane-backup" tabindex="-1" data-settab="backup" onclick="settingsTab('backup')">Backup & Restore</button><button type="button" role="tab" id="setTab-system" class="setTab" aria-selected="false" aria-controls="setPane-system" tabindex="-1" data-settab="system" onclick="settingsTab('system')">System</button><button type="button" role="tab" id="setTab-danger" class="setTab danger" aria-selected="false" aria-controls="setPane-danger" tabindex="-1" data-settab="danger" onclick="settingsTab('danger')">Danger Zone</button></div>
+<div class="setPanes" id="settingsPanes">
+<div class="setPane" id="setPane-backup" data-setpane="backup" role="tabpanel" aria-labelledby="setTab-backup">
   <div class="card"><h3 style="margin-top:0">Backup & Restore</h3><p class="muted">Create a complete white-label backup containing the SQLite database, settings, and uploaded branding assets.</p><div class="notice"><b>Backup file:</b> <code>.vegebak</code><br>This is the system's self-contained backup format. Legacy <code>.sqlite3</code> backups remain restorable.</div><div class="actions"><button class="primary" onclick="downloadBackup()">⬇ Download Full Backup</button><label class="secondary" style="cursor:pointer">↥ Restore Backup<input id="restoreFile" type="file" accept=".vegebak,.sqlite3,application/octet-stream" style="display:none" onchange="restoreBackup()"></label></div><div id="backupStatus" class="muted"></div></div>
+</div>
+<div class="setPane" id="setPane-system" data-setpane="system" role="tabpanel" aria-labelledby="setTab-system">
   <div class="card" id="systemHealthCard"><h3 style="margin-top:0">System Health</h3><p class="muted">Live self-check of the books, the database and your backups.</p><div class="actions"><button class="secondary" onclick="loadSystemHealth()">↻ Run Health Check</button></div><div id="systemHealthBody" class="muted">Not checked yet.</div></div>
+</div>
+<div class="setPane" id="setPane-sms" data-setpane="sms" role="tabpanel" aria-labelledby="setTab-sms">
   <div class="card" id="smsCard"><h3 style="margin-top:0">Owner SMS Alerts</h3>
   <p class="muted">Text-message alerts sent to the owner's phone through the SMSGate Android gateway. Every figure in an SMS comes from the same calculations shown on this app - the message can never disagree with the screen.</p>
   <div id="smsGatewayStatus" class="notice">Loading SMS status...</div>
@@ -464,13 +602,22 @@ tr.bad>td{background:#fff7f6}
     <button class="secondary" onclick="runSmsScan()">Re-check Now</button>
     <button class="secondary" onclick="sendSmsSummary()">Send Summary Now</button></div>
   <div id="smsStatusBody" class="muted"></div></div>
+</div>
+<div class="setPane" id="setPane-smslog" data-setpane="smslog" role="tabpanel" aria-labelledby="setTab-smslog">
   <div class="card" id="smsHistoryCard"><h3 style="margin-top:0">SMS Notification History</h3><p class="muted">Every alert this system has attempted, with delivery state.</p>
   <div class="actions"><button class="secondary" onclick="loadSmsHistory()">Refresh</button><button class="secondary" onclick="retryFailedSms()">Retry Failed</button></div>
   <div id="smsHistoryBody" class="muted">Not loaded yet.</div></div>
+</div>
+<div class="setPane active" id="setPane-general" data-setpane="general" role="tabpanel" aria-labelledby="setTab-general">
   <div class="card"><h3 style="margin-top:0">White-label Configuration</h3><div class="row"><div class="field"><label>Company Name</label><input id="setCompanyName" maxlength="180"></div><div class="field"><label>Tagline</label><input id="setTagline" maxlength="500"></div></div><div class="row"><div class="field"><label>Primary Color</label><div style="display:flex;gap:8px"><input id="setPrimaryColor" class="colorSwatch" type="color"><input id="setPrimaryColorText" maxlength="7"></div></div><div class="field"><label>Secondary Color</label><div style="display:flex;gap:8px"><input id="setSecondaryColor" class="colorSwatch" type="color"><input id="setSecondaryColorText" maxlength="7"></div></div><div class="field"><label>Background Color</label><div style="display:flex;gap:8px"><input id="setBackgroundColor" class="colorSwatch" type="color"><input id="setBackgroundColorText" maxlength="7"></div></div></div><div class="actions"><button class="primary" onclick="saveSettings()">Save White-label Settings</button></div></div>
   <div class="card"><h3 style="margin-top:0">Brand Assets</h3><p class="muted">PNG, JPG or WebP. Each upload replaces only that asset.</p><div id="assetSettings"></div></div>
+</div>
+<div class="setPane" id="setPane-receipt" data-setpane="receipt" role="tabpanel" aria-labelledby="setTab-receipt">
   <div class="card"><h3 style="margin-top:0">Receipt Configuration</h3><p class="muted">Stored now for future receipt/printing features. It does not change existing transaction behavior.</p><div class="row"><div class="field"><label>Enable Receipt Features</label><select id="receiptEnabled"><option value="false">Disabled</option><option value="true">Enabled</option></select></div><div class="field"><label>Paper Size</label><select id="receiptPaper"><option>58mm</option><option selected>80mm</option><option>A4</option></select></div></div><div class="row"><div class="field"><label>Receipt Header</label><input id="receiptHeader"></div><div class="field"><label>Receipt Footer</label><input id="receiptFooter"></div></div><div class="row"><div class="field"><label>Business Address</label><input id="receiptAddress"></div><div class="field"><label>Phone</label><input id="receiptPhone"></div><div class="field"><label>Email</label><input id="receiptEmail"></div><div class="field"><label>TIN</label><input id="receiptTin"></div></div><label style="display:flex;gap:8px;align-items:center;margin-top:10px"><input id="receiptShowLogo" type="checkbox"> Show logo on future receipts</label><div class="actions"><button class="primary" onclick="saveReceiptSettings()">Save Receipt Configuration</button></div></div>
+</div>
+<div class="setPane" id="setPane-danger" data-setpane="danger" role="tabpanel" aria-labelledby="setTab-danger">
   <div class="card" style="border-color:#efb1ad;background:#fffafa"><h3 style="margin-top:0;color:#8f211b">Danger Zone — Wipe All Business Data</h3><p class="muted">This permanently deletes products, sales, purchases, collections, cash transactions, inventory movements, stocktakes, accounting effects and audit history. <b>Your owner login, White-label settings, Receipt settings and branding assets are preserved.</b></p><div class="notice bad"><b>This cannot be undone.</b> Create a full <code>.vegebak</code> backup before using this.</div><div class="row"><div class="field"><label>Admin Password</label><input id="wipePassword" type="password" autocomplete="current-password" placeholder="Enter admin password"></div><div class="field"><label>Type <code>WIPE ALL DATA</code> to confirm</label><input id="wipeConfirmation" autocomplete="off" placeholder="WIPE ALL DATA"></div><button class="danger" onclick="wipeAllData()">WIPE ALL DATA</button></div><div id="wipeStatus" class="muted" style="margin-top:8px"></div></div>
+</div>
 </div></section>
 </main>
 <div id="productModal" class="modal"><div class="modalbox"><div class="modalHead"><h2>Add Product</h2><button class="close" onclick="closeModal('productModal')">Close</button></div><div class="grid"><div class="field"><label>Product Name</label><input id="pName"></div><div class="field"><label>SKU / Code</label><input id="pSku"></div><div class="field"><label>Category</label><input id="pCat"></div><div class="field"><label>Unit</label><input id="pUnit" value="kg"></div><div class="field"><label>Source Type</label><select id="pSource"><option>Farm Production</option><option>Purchased</option><option>Other</option></select></div><div class="field"><label>Opening Unit Cost</label><input id="pCost" type="number" min="0" step=".01"></div><div class="field"><label>Selling Price</label><input id="pPrice" type="number" min="0" step=".01"></div><div class="field"><label>Reorder Level (low-stock alert)</label><input id="pReorder" type="number" min="0" step=".001" value="0"></div><div class="field"><label>Perishable</label><select id="pPerishable"><option value="0">No</option><option value="1">Yes</option></select></div><div class="field"><label>Track Expiration</label><select id="pHasExp"><option value="0">No</option><option value="1">Yes</option></select></div><div class="field"><label>Shelf Life (days)</label><input id="pShelf" type="number" min="0" step="1" value="0"></div><div class="field"><label>Expiry Alert Days</label><input id="pAlert" type="number" min="0" step="1" value="7"></div><div class="field"><label>Opening Quantity</label><input id="pOpen" type="number" min="0" step=".001"></div><div class="field"><label>Opening Date</label><input id="pOpenDate" type="date"></div><div class="field"><label>Opening Lot / Batch Code</label><input id="pOpenLot" maxlength="60"></div><div class="field"><label>Opening Expiry Date</label><input id="pOpenExp" type="date"></div><div class="field" style="grid-column:1/-1"><label>Notes</label><input id="pNotes" maxlength="500"></div></div><div class="actions"><button class="primary" onclick="saveProduct()">Save Product</button><button class="secondary" onclick="closeModal('productModal')">Cancel</button></div></div></div>
@@ -1098,5 +1245,38 @@ window.addEventListener('pageshow',refreshInstallUi);
 setInterval(refreshInstallUi,4000);
 refreshInstallUi();
 initializeApp().catch(err=>{setSync('Startup recovered',true);hideBrandSplash();showAuth()});if('serviceWorker' in navigator&&window.isSecureContext){navigator.serviceWorker.register('./sw.js',{scope:'./',updateViaCache:'none'}).then(reg=>{reg.update().catch(()=>{});setTimeout(refreshInstallUi,0)}).catch(()=>{});}
+
+/* ---- desktop settings tabs (view-only; no data reloads on switch) ---- */
+function settingsTab(key){
+  const tabs=[...document.querySelectorAll('#settingsTabs .setTab')];
+  if(!tabs.length)return;
+  if(!tabs.some(t=>t.dataset.settab===key))key=tabs[0].dataset.settab;
+  tabs.forEach(t=>{const on=t.dataset.settab===key;t.classList.toggle('active',on);t.setAttribute('aria-selected',on?'true':'false');t.tabIndex=on?0:-1});
+  document.querySelectorAll('#settingsPanes .setPane').forEach(p=>p.classList.toggle('active',p.dataset.setpane===key));
+  try{localStorage.setItem('vege_settings_tab',key)}catch{}
+}
+document.getElementById('settingsTabs')?.addEventListener('keydown',e=>{
+  const keys=['ArrowLeft','ArrowRight','Home','End'];if(!keys.includes(e.key))return;
+  const tabs=[...document.querySelectorAll('#settingsTabs .setTab')];
+  const cur=tabs.findIndex(t=>t.classList.contains('active'));if(cur<0)return;
+  let next=cur;
+  if(e.key==='ArrowLeft')next=(cur-1+tabs.length)%tabs.length;
+  if(e.key==='ArrowRight')next=(cur+1)%tabs.length;
+  if(e.key==='Home')next=0;
+  if(e.key==='End')next=tabs.length-1;
+  e.preventDefault();settingsTab(tabs[next].dataset.settab);tabs[next].focus();
+});
+try{const savedTab=localStorage.getItem('vege_settings_tab');if(savedTab)settingsTab(savedTab)}catch{}
+
+/* ---- desktop sidebar collapse (rail) ---- */
+function toggleDeskNav(){
+  const on=!document.body.classList.contains('navRail');
+  document.body.classList.toggle('navRail',on);
+  const b=document.getElementById('navCollapseBtn');
+  if(b){b.setAttribute('aria-label',on?'Expand navigation':'Collapse navigation');b.title=b.getAttribute('aria-label')}
+  try{localStorage.setItem('vege_nav_rail',on?'1':'0')}catch{}
+}
+try{if(localStorage.getItem('vege_nav_rail')==='1'){document.body.classList.add('navRail');const b=document.getElementById('navCollapseBtn');if(b){b.setAttribute('aria-label','Expand navigation');b.title='Expand navigation'}}}catch{}
+
 </script>
 </body></html>
