@@ -450,6 +450,15 @@ tr.bad>td{background:#fff7f6}
 .setPane+.setPane{margin-top:var(--s4)}
 
 /* ---- POS-style cart cards (sales / purchases) ---- */
+/* Login logo: upper-centre of the sign-in card and large enough to read. */
+.loginLogoImg{width:120px;height:120px;object-fit:contain;border-radius:20px;margin:0 auto 16px;display:block}
+@media (max-width:480px){.loginLogoImg{width:96px;height:96px;margin-bottom:12px}}
+/* Checkbox + label rows: one consistent gap on every device. */
+.checkRow{display:flex;align-items:center;gap:10px;margin-top:12px;line-height:1.35;cursor:pointer}
+.checkRow input[type=checkbox]{flex:0 0 auto;width:18px;height:18px;margin:0}
+.checkRow span{flex:1 1 auto}
+/* Bulk (grouped) transaction rows */
+.grpToggle{display:inline-flex;align-items:center;gap:6px}
 .posCartHead{display:flex;align-items:center;justify-content:space-between;gap:var(--s2);margin-bottom:var(--s2)}
 .posCartFoot{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:var(--s2);margin-top:var(--s3);padding-top:var(--s3);border-top:1px solid var(--line)}
 .posTotals{min-width:0;font-size:var(--fs-2)}
@@ -574,7 +583,7 @@ tr.bad>td{background:#fff7f6}
 <script src="./vendor/chart.umd.js" defer></script>
 </head>
 <body>
-<div id="brandSplash" class="brandSplash"><div class="brandSplashBox"><img id="splashLogo" alt="Company logo"><div id="splashTitle" class="brandSplashTitle">Loading…</div><div class="muted" style="margin-top:6px">Loading system…</div></div></div><div id="auth" class="auth"><form class="authbox" onsubmit="return doLogin(event)"><img id="loginLogo" alt="Company logo" style="display:none;width:70px;height:70px;object-fit:contain;border-radius:14px;margin-bottom:12px"><h2 id="loginTitle" style="margin-top:0">Owner Login</h2><p id="loginTagline" class="muted">Please sign in to continue.</p><div class="field"><label>Owner Password</label><input id="loginPassword" type="password" autocomplete="current-password" required></div><button class="primary" style="width:100%;margin-top:14px">Sign In</button><button id="authInstallAppBtn" type="button" class="secondary hidden" style="width:100%;margin-top:8px" onclick="installPwa()">Install App</button><div id="installHelp" class="muted hidden" style="margin-top:8px;line-height:1.45"></div><div id="loginError" class="notice bad hidden" style="margin-top:12px"></div></form></div>
+<div id="brandSplash" class="brandSplash"><div class="brandSplashBox"><img id="splashLogo" alt="Company logo"><div id="splashTitle" class="brandSplashTitle">Loading…</div><div class="muted" style="margin-top:6px">Loading system…</div></div></div><div id="auth" class="auth"><form class="authbox" onsubmit="return doLogin(event)"><img id="loginLogo" class="loginLogoImg" alt="Company logo" style="display:none"><h2 id="loginTitle" style="margin-top:0">Owner Login</h2><p id="loginTagline" class="muted">Please sign in to continue.</p><div class="field"><label>Owner Password</label><input id="loginPassword" type="password" autocomplete="current-password" required></div><button class="primary" style="width:100%;margin-top:14px">Sign In</button><button id="authInstallAppBtn" type="button" class="secondary hidden" style="width:100%;margin-top:8px" onclick="installPwa()">Install App</button><div id="installHelp" class="muted hidden" style="margin-top:8px;line-height:1.45"></div><div id="loginError" class="notice bad hidden" style="margin-top:12px"></div></form></div>
 <div id="installGuide" class="modal" onclick="if(event.target===this)closeInstallGuide()"><div class="modalbox sm"><div class="modalHead"><h3 id="installGuideTitle" style="margin:0">Install App</h3><button class="close" type="button" onclick="closeInstallGuide()">Close</button></div><ol id="installGuideSteps" style="margin:14px 0 0;padding-left:20px;line-height:1.5"></ol><div class="muted" style="margin-top:12px">Once installed, the app opens in its own window with its own icon.</div></div></div>
 <header id="appHeader" class="hidden"><div class="top"><div style="display:flex;gap:10px;align-items:center"><button class="sidebarToggle" onclick="toggleSidebar()" aria-label="Open menu">☰</button><img id="headerLogo" alt="Company logo" style="display:none;width:42px;height:42px;object-fit:contain;border-radius:10px;background:#ffffff22"><div><h1 id="appTitle">Business Manager</h1><div id="appSubtitle" class="sub">Loading application…</div></div></div><div style="display:flex;align-items:center;gap:8px"><button id="installAppBtn" class="logout hidden" onclick="installPwa()">Install App</button><span id="syncStatus" class="status">Connecting…</span><button class="logout" onclick="logout()">Logout</button></div></div></header>
 <aside id="sidebar" class="hidden"><div id="sidebarBrand"><img id="sidebarLogo" alt="Company logo"><div id="sidebarBrandText"><div id="sidebarBrandName">Business Manager</div><div id="sidebarBrandSub">Business Manager</div></div><button id="navCollapseBtn" type="button" class="navCollapse" onclick="toggleDeskNav()" aria-label="Collapse navigation" title="Collapse navigation">&#8676;</button></div><nav id="nav"></nav><div class="sidebarFooter">Install this system as an app from your browser for a cleaner desktop/mobile experience.</div></aside><div id="sidebarOverlay" onclick="closeSidebar()"></div>
@@ -642,7 +651,7 @@ tr.bad>td{background:#fff7f6}
   <div class="card"><h3 style="margin-top:0">Brand Assets</h3><p class="muted">PNG, JPG or WebP. Each upload replaces only that asset.</p><div id="assetSettings"></div></div>
 </div>
 <div class="setPane" id="setPane-receipt" data-setpane="receipt" role="tabpanel" aria-labelledby="setTab-receipt">
-  <div class="card"><h3 style="margin-top:0">Receipt Configuration</h3><p class="muted">Stored now for future receipt/printing features. It does not change existing transaction behavior.</p><div class="row"><div class="field"><label>Enable Receipt Features</label><select id="receiptEnabled"><option value="false">Disabled</option><option value="true">Enabled</option></select></div><div class="field"><label>Paper Size</label><select id="receiptPaper"><option>58mm</option><option selected>80mm</option><option>A4</option></select></div></div><div class="row"><div class="field"><label>Receipt Header</label><input id="receiptHeader"></div><div class="field"><label>Receipt Footer</label><input id="receiptFooter"></div></div><div class="row"><div class="field"><label>Business Address</label><input id="receiptAddress"></div><div class="field"><label>Phone</label><input id="receiptPhone"></div><div class="field"><label>Email</label><input id="receiptEmail"></div><div class="field"><label>TIN</label><input id="receiptTin"></div></div><label style="display:flex;gap:8px;align-items:center;margin-top:10px"><input id="receiptShowLogo" type="checkbox"> Show logo on future receipts</label><div class="actions"><button class="primary" onclick="saveReceiptSettings()">Save Receipt Configuration</button></div></div>
+  <div class="card"><h3 style="margin-top:0">Receipt Configuration</h3><p class="muted">Stored now for future receipt/printing features. It does not change existing transaction behavior.</p><div class="row"><div class="field"><label>Enable Receipt Features</label><select id="receiptEnabled"><option value="false">Disabled</option><option value="true">Enabled</option></select></div><div class="field"><label>Paper Size</label><select id="receiptPaper"><option>58mm</option><option selected>80mm</option><option>A4</option></select></div></div><div class="row"><div class="field"><label>Receipt Header</label><input id="receiptHeader"></div><div class="field"><label>Receipt Footer</label><input id="receiptFooter"></div></div><div class="row"><div class="field"><label>Business Address</label><input id="receiptAddress"></div><div class="field"><label>Phone</label><input id="receiptPhone"></div><div class="field"><label>Email</label><input id="receiptEmail"></div><div class="field"><label>TIN</label><input id="receiptTin"></div></div><label class="checkRow"><input id="receiptShowLogo" type="checkbox"><span>Show logo on future receipts</span></label><div class="actions"><button class="primary" onclick="saveReceiptSettings()">Save Receipt Configuration</button></div></div>
 </div>
 <div class="setPane" id="setPane-danger" data-setpane="danger" role="tabpanel" aria-labelledby="setTab-danger">
   <div class="card" style="border-color:#efb1ad;background:#fffafa"><h3 style="margin-top:0;color:#8f211b">Danger Zone — Wipe All Business Data</h3><p class="muted">This permanently deletes products, sales, purchases, collections, cash transactions, inventory movements, stocktakes, accounting effects and audit history. <b>Your owner login, White-label settings, Receipt settings and branding assets are preserved.</b></p><div class="notice bad"><b>This cannot be undone.</b> Create a full <code>.vegebak</code> backup before using this.</div><div class="row"><div class="field"><label>Admin Password</label><input id="wipePassword" type="password" autocomplete="current-password" placeholder="Enter admin password"></div><div class="field"><label>Type <code>WIPE ALL DATA</code> to confirm</label><input id="wipeConfirmation" autocomplete="off" placeholder="WIPE ALL DATA"></div><button class="danger" onclick="wipeAllData()">WIPE ALL DATA</button></div><div id="wipeStatus" class="muted" style="margin-top:8px"></div></div>
@@ -1033,9 +1042,15 @@ function productRow(p){
     rowInput(p.id,'category',p.category),
     `<select class="rowInput" id="ed_source_${p.id}">${['Farm Production','Purchased','Other'].map(o=>`<option ${o===p.source_type?'selected':''}>${o}</option>`).join('')}</select>`,
     rowInput(p.id,'unit',p.unit),
-    `<span class="muted">${money(p.unit_cost)}</span>`,
+    rowInput(p.id,'avgcost',money2s(p.unit_cost),'number'),
     rowInput(p.id,'price',num(p.selling_price),'number'),
-    `<span class="muted">${num(p.stock_qty).toFixed(3)}</span>`,
+    // Editing the stock quantity is the trigger for the automatic lot / batch:
+    // an increase books a stock-in adjustment and opens a new lot dated today,
+    // reusing this product's existing lot code, with the expiry date below.
+    `${rowInput(p.id,'stock',num(p.stock_qty).toFixed(3),'number')}
+      <div class="muted" style="margin-top:4px;font-size:.72rem">New lot expiry (if stock increases)</div>
+      <input class="rowInput" id="ed_lotexp_${p.id}" type="date" value="${esc(suggestedLotExpiry(p))}">
+      <div class="muted" style="margin-top:2px;font-size:.72rem">Lot code: ${esc(latestLotCode(p)||'auto')}</div>`,
     rowInput(p.id,'reorder',num(p.reorder_level),'number'),
     rowInput(p.id,'shelf',num(p.shelf_life_days),'number'),
     rowInput(p.id,'alert',num(p.expiry_alert_days),'number'),
@@ -1130,11 +1145,53 @@ async function dismissSpoilageQueue(id){
 }
 function startProductRow(id){editingProductId=id;renderProducts();setTimeout(()=>$('ed_name_'+id)?.focus(),0)}
 function cancelProductRow(){editingProductId=null;renderProducts()}
+function money2s(v){return (Math.round(num(v)*100)/100).toFixed(2)}
+/** The lot code already used by this product's newest lot (kept for new lots). */
+function latestLotCode(p){
+  const lots=(p.lots||[]).filter(l=>l.lot_code);
+  if(!lots.length)return '';
+  const newest=lots.slice().sort((a,b)=>String(a.received_date||'').localeCompare(String(b.received_date||''))||num(a.id)-num(b.id)).pop();
+  return newest?.lot_code||'';
+}
+/** Pre-fills the new-lot expiry from the shelf life; still editable before saving. */
+function suggestedLotExpiry(p){
+  const shelf=num(p.shelf_life_days);
+  if(!(shelf>0))return '';
+  const d=new Date();d.setDate(d.getDate()+Math.round(shelf));
+  return d.toISOString().slice(0,10);
+}
 async function saveProductRow(id){
   const v=f=>$(`ed_${f}_${id}`)?.value;
+  const p=products.find(x=>x.id===id)||{};
+  const today=new Date().toISOString().slice(0,10);
+  const newCost=Number(v('avgcost')||0), newStock=Number(v('stock')||0);
+  const oldCost=num(p.unit_cost), oldStock=num(p.stock_qty);
+  const lotExpiry=v('lotexp')||'';
+  const costChanged=Math.abs(newCost-oldCost)>0.005;
+  const stockDelta=Math.round((newStock-oldStock)*1000)/1000;
+  if(newStock<0)return showToast('Stock quantity cannot be negative.',true);
+  if(lotExpiry&&lotExpiry<today&&stockDelta>0)return showToast('New lot expiry cannot be earlier than today.',true);
   try{
     await api('/products/'+id,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:v('name'),sku:v('sku'),category:v('category'),source_type:v('source'),unit:v('unit'),selling_price:Number(v('price')||0),reorder_level:Number(v('reorder')||0),shelf_life_days:Number(v('shelf')||0),expiry_alert_days:Number(v('alert')||0),has_expiration:Number(v('hasexp')||0),is_perishable:Number(v('perish')||0)})});
-    editingProductId=null;showToast('Product updated.');await load();
+    const notes=[];
+    // Cost first, so any new stock is added at the corrected average cost.
+    if(costChanged&&oldStock>0.0001){
+      const r=await api('/inventory/revalue',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({product_id:id,unit_cost:newCost,date:today,reference:'Inline average cost correction'})});
+      notes.push(`Average cost set to ${money(newCost)} (inventory value ${num(r.delta)>=0?'+':''}${money(r.delta)}).`);
+    }else if(costChanged){
+      notes.push('Average cost is derived from stock on hand; add stock first.');
+    }
+    if(Math.abs(stockDelta)>0.0005){
+      const body={product_id:id,date:today,type:stockDelta>0?'ADJUST_IN':'ADJUST_OUT',quantity:Math.abs(stockDelta),
+        unit_cost:costChanged?newCost:oldCost,reference:'Inline stock correction'};
+      if(stockDelta>0){ body.batch_lot=latestLotCode(p)||''; if(lotExpiry)body.expiry_date=lotExpiry; }
+      const r=await api('/inventory/adjust',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+      notes.push(stockDelta>0
+        ?`Stock increased by ${Math.abs(stockDelta).toFixed(3)} ${p.unit||''} — new lot ${latestLotCode(p)||'auto'} received ${today}${lotExpiry?`, expiry ${lotExpiry}`:''}.`
+        :`Stock reduced by ${Math.abs(stockDelta).toFixed(3)} ${p.unit||''} (count correction #${r.id}).`);
+    }
+    editingProductId=null;showToast(['Product updated.',...notes].join(' '));await load();
+    try{await applyReportPeriod()}catch{}
   }catch(e){showToast(e.message,true)}
 }
 async function deleteProductRow(id){
@@ -1153,8 +1210,73 @@ async function archiveProductRow(id,archived){
   catch(e){showToast(e.message,true)}
 }
 function renderCash(){$('cashTable').innerHTML=tab(['Date','Direction','Category','Amount','Description','Source'],cash.map(x=>[esc(x.date),x.direction==='in'?'Cash In':'Cash Out',esc(x.category),money(x.amount),esc(x.description),`<span class="tag">${esc(x.source||'manual')}</span>`]));}
-function renderSales(){$('salesTable').innerHTML=tab(['ID','Date','Customer','Product','Qty','Price','Discount','Net Sales','COGS','Gross Profit','Payment','Detail'],sales.map(x=>[x.id,esc(x.date),esc(x.customer),esc(x.product_name),num(x.quantity).toFixed(3),money(x.price),money(x.discount),money(x.total),money(x.cost_total),money(x.total-x.cost_total),esc(x.payment_status),`<button class="secondary small" onclick="openTransaction('sale',${x.id})">View</button>`]));}
-function renderPurchases(){$('purchaseTable').innerHTML=tab(['ID','Date','Supplier','Product','Qty','Unit Cost','Total','Payment','Detail'],purchases.map(x=>[x.id,esc(x.date),esc(x.supplier),esc(x.product_name),num(x.quantity).toFixed(3),money(x.unit_cost),money(x.total),esc(x.payment_status),`<button class="secondary small" onclick="openTransaction('purchase',${x.id})">View</button>`]));}
+/* ==========================================================================
+   BULK (GROUPED) SALES & PURCHASES TABLES
+   One checkout stamps every line with the same group_ref, so a bulk sale or
+   purchase for one customer / supplier is shown as ONE summary line with the
+   products folded inside it. Older rows recorded before group_ref existed are
+   grouped by date + customer/supplier + payment status, which is exactly how
+   they were entered. Nothing is re-computed: every figure is the sum of the
+   stored line rows, so the tables always agree with the ledger.
+--------------------------------------------------------------------------- */
+function newGroupRef(prefix){return `${prefix}${Date.now().toString(36).toUpperCase()}${Math.random().toString(36).slice(2,6).toUpperCase()}`}
+const expandedTxGroups=new Set();
+function toggleTxGroup(key){expandedTxGroups.has(key)?expandedTxGroups.delete(key):expandedTxGroups.add(key);renderSales();renderPurchases()}
+function groupTransactions(rows,partyField){
+  const groups=[];const byKey=new Map();
+  for(const r of rows){
+    const party=String(r[partyField]||'').trim();
+    const key=r.group_ref?`g:${r.group_ref}`:`l:${r.date}|${party.toLowerCase()}|${String(r.payment_status||'').toLowerCase()}`;
+    let g=byKey.get(key);
+    if(!g){g={key,date:r.date,party,payment_status:r.payment_status,ids:[],lines:[]};byKey.set(key,g);groups.push(g)}
+    g.ids.push(r.id);g.lines.push(r);
+  }
+  return groups;
+}
+function groupTable(headers,groups,buildSummary,buildDetail,detailHeaders,empty){
+  const lab=h=>String(h).replace(/<[^>]*>/g,'').replace(/"/g,'&quot;').trim();
+  const body=groups.map(g=>{
+    const open=expandedTxGroups.has(g.key);
+    const cells=buildSummary(g,open).map((x,i)=>`<td data-label="${lab(headers[i]||'')}"${i===0?' data-primary="1"':''}>${x}</td>`).join('');
+    const detail=open&&g.lines.length>1
+      ? `<tr><td colspan="${headers.length}"><div class="reportSubDetail"><b>${g.lines.length} product line(s)</b><div class="tablewrap"><table><thead><tr>${detailHeaders.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${g.lines.map(l=>`<tr>${buildDetail(l).map(x=>`<td>${x}</td>`).join('')}</tr>`).join('')}</tbody></table></div></div></td></tr>`
+      : '';
+    return `<tr>${cells}</tr>${detail}`;
+  }).join('');
+  return `<div class="tablewrap"><table><thead><tr>${headers.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${body||`<tr><td colspan="${headers.length}" class="empty tdEmpty">${empty}</td></tr>`}</tbody></table></div>`;
+}
+function groupRefCell(g,open){
+  if(g.lines.length===1)return `#${g.ids[0]}`;
+  return `<button class="secondary small grpToggle" onclick="toggleTxGroup('${g.key}')">${open?'▾':'▸'} #${g.ids[0]}–#${g.ids[g.ids.length-1]}</button><div class="muted">${g.lines.length} products</div>`;
+}
+function productSummary(g){
+  if(g.lines.length===1)return esc(g.lines[0].product_name||'');
+  return `${esc(g.lines.map(l=>l.product_name).filter(Boolean).slice(0,3).join(', '))}${g.lines.length>3?` +${g.lines.length-3} more`:''}`;
+}
+function renderSales(){
+  const groups=groupTransactions(sales,'customer');
+  const headers=['Transaction','Date','Customer','Products','Qty','Discount','Net Sales','COGS','Gross Profit','Payment','Detail'];
+  const detailHeaders=['ID','Product','Qty','Price','Discount','Net Sales','COGS','Detail'];
+  $('salesTable').innerHTML=groupTable(headers,groups,(g,open)=>{
+    const qty=g.lines.reduce((a,l)=>a+num(l.quantity),0);
+    const disc=g.lines.reduce((a,l)=>a+num(l.discount),0);
+    const net=g.lines.reduce((a,l)=>a+num(l.total),0);
+    const cogs=g.lines.reduce((a,l)=>a+num(l.cost_total),0);
+    return [groupRefCell(g,open),esc(g.date),esc(g.party),productSummary(g),qty.toFixed(3),money(disc),money(net),money(cogs),money(net-cogs),esc(g.payment_status),
+      g.lines.length===1?`<button class="secondary small" onclick="openTransaction('sale',${g.ids[0]})">View</button>`:`<button class="secondary small" onclick="toggleTxGroup('${g.key}')">${open?'Hide':'Show'} lines</button>`];
+  },l=>[l.id,esc(l.product_name),num(l.quantity).toFixed(3),money(l.price),money(l.discount),money(l.total),money(l.cost_total),`<button class="secondary small" onclick="openTransaction('sale',${l.id})">View</button>`],detailHeaders,'No records');
+}
+function renderPurchases(){
+  const groups=groupTransactions(purchases,'supplier');
+  const headers=['Transaction','Date','Supplier','Products','Qty','Total','Payment','Detail'];
+  const detailHeaders=['ID','Product','Qty','Unit Cost','Total','Detail'];
+  $('purchaseTable').innerHTML=groupTable(headers,groups,(g,open)=>{
+    const qty=g.lines.reduce((a,l)=>a+num(l.quantity),0);
+    const total=g.lines.reduce((a,l)=>a+num(l.total),0);
+    return [groupRefCell(g,open),esc(g.date),esc(g.party),productSummary(g),qty.toFixed(3),money(total),esc(g.payment_status),
+      g.lines.length===1?`<button class="secondary small" onclick="openTransaction('purchase',${g.ids[0]})">View</button>`:`<button class="secondary small" onclick="toggleTxGroup('${g.key}')">${open?'Hide':'Show'} lines</button>`];
+  },l=>[l.id,esc(l.product_name),num(l.quantity).toFixed(3),money(l.unit_cost),money(l.total),`<button class="secondary small" onclick="openTransaction('purchase',${l.id})">View</button>`],detailHeaders,'No records');
+}
 function renderCollections(){$('collectionTable').innerHTML=tab(['ID','Date','Customer','Amount','Reference','Sale Link','Detail'],collections.map(x=>[x.id,esc(x.date),esc(x.customer),money(x.amount),esc(x.reference),x.sale_id?`Sale #${x.sale_id}`:'Unallocated',`<button class="secondary small" onclick="openTransaction('collection',${x.id})">View</button>`]));}
 async function saveCash(){const btn=$('cashSaveBtn');btn.disabled=true;try{await api('/cash',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({date:$('cashDate').value,direction:$('cashDir').value,category:$('cashCat').value,amount:Number($('cashAmt').value),description:$('cashDesc').value})});$('cashAmt').value='';$('cashDesc').value='';showToast('Cash transaction saved.');await load()}catch(e){showToast(e.message,true)}finally{btn.disabled=false}}
 /* ==========================================================================
@@ -1215,9 +1337,12 @@ async function saveSale(){
   const btn=$('saleBtn');if(!saleCart.length)return showToast('Add at least one item to the cart first.',true);
   btn.disabled=true;btn.textContent='Recording…';
   const ok=[],failed=[];let cost=0;const fefo=[];
+  // One checkout = one transaction reference, so a bulk sale to the same
+  // customer shows as ONE line in the Sales table.
+  const groupRef=newGroupRef('S');
   for(const line of [...saleCart]){
     try{
-      const r=await api('/sales',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({date:line.date,customer:line.customer,product_id:line.product_id,quantity:num(line.quantity),price:num(line.price),discount:num(line.discount),payment_status:line.payment_status})});
+      const r=await api('/sales',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({date:line.date,customer:line.customer,product_id:line.product_id,quantity:num(line.quantity),price:num(line.price),discount:num(line.discount),payment_status:line.payment_status,group_ref:groupRef})});
       ok.push(r.id);cost+=num(r.cost);
       (r.lot_allocations||[]).filter(a=>a.lot_id).forEach(a=>fefo.push(`${a.lot_code||'Lot #'+a.lot_id}${a.expiry_date?' (exp '+a.expiry_date+')':''} × ${num(a.quantity).toFixed(3)}`));
       saleCart.splice(saleCart.indexOf(line),1);
@@ -1270,9 +1395,10 @@ async function savePurchase(){
   const btn=$('purchaseBtn');if(!purchaseCart.length)return showToast('Add at least one item to the cart first.',true);
   btn.disabled=true;btn.textContent='Recording…';
   const ok=[],failed=[];let wac=null;
+  const groupRef=newGroupRef('P');
   for(const line of [...purchaseCart]){
     try{
-      const r=await api('/purchases',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({date:line.date,supplier:line.supplier,product_id:line.product_id,quantity:num(line.quantity),unit_cost:num(line.unit_cost),batch_lot:line.batch_lot,expiry_date:line.expiry_date,payment_status:line.payment_status})});
+      const r=await api('/purchases',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({date:line.date,supplier:line.supplier,product_id:line.product_id,quantity:num(line.quantity),unit_cost:num(line.unit_cost),batch_lot:line.batch_lot,expiry_date:line.expiry_date,payment_status:line.payment_status,group_ref:groupRef})});
       ok.push(r.id);wac=r.newWeightedAverageCost;
       purchaseCart.splice(purchaseCart.indexOf(line),1);
     }catch(e){line.error=e.message;failed.push(`${line.product_name}: ${e.message}`)}
