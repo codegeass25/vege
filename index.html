@@ -434,9 +434,29 @@ tr.bad>td{background:#fff7f6}
 
 /* shared desktop components (safe at every width) */
 .toolbar{display:flex;gap:var(--s2);flex-wrap:wrap;align-items:center}
-.setTabs{display:none}
-.setPane{display:block}
+/* ---- settings tabs: tabular at every width (mobile / tablet / desktop) ---- */
+.setTabs{display:flex;gap:var(--s1);border-bottom:1px solid var(--line);margin-bottom:var(--s4);flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none;position:sticky;top:0;z-index:5;background:var(--surface,#fff)}
+.setTabs::-webkit-scrollbar{display:none}
+.setTab{flex:0 0 auto;border:0;background:transparent;padding:10px var(--s3);min-height:44px;font-weight:700;font-size:var(--fs-2);color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;border-radius:var(--r-sm) var(--r-sm) 0 0;white-space:nowrap}
+.setTab.active{color:var(--g2);border-bottom-color:var(--g)}
+.setTab.danger{color:#96241d}
+.setTab.danger.active{border-bottom-color:var(--danger)}
+.setTab .setTabFull{display:none}
+.setTab .setTabShort{display:inline}
+@media (min-width:640px){.setTab .setTabFull{display:inline}.setTab .setTabShort{display:none}}
+.setPanes{display:block}
+.setPane{display:none}
+.setPane.active{display:block}
 .setPane+.setPane{margin-top:var(--s4)}
+
+/* ---- POS-style cart cards (sales / purchases) ---- */
+.posCartHead{display:flex;align-items:center;justify-content:space-between;gap:var(--s2);margin-bottom:var(--s2)}
+.posCartFoot{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:var(--s2);margin-top:var(--s3);padding-top:var(--s3);border-top:1px solid var(--line)}
+.posTotals{min-width:0;font-size:var(--fs-2)}
+.posTotals b{font-size:var(--fs-3)}
+.posCheckout{flex:0 0 auto;min-height:46px;font-weight:800}
+.posCheckout[disabled]{opacity:.55;cursor:not-allowed}
+.posLineErr{color:#8f211b;font-size:var(--fs-1)}
 
 @media (min-width:1024px){
   main{padding:var(--s6) var(--s7) var(--s8);padding-left:calc(var(--nav-w) + var(--s7));transition:padding-left var(--dur-3) var(--ease)}
@@ -523,17 +543,12 @@ tr.bad>td{background:#fff7f6}
   .modalBody{padding:var(--s5) var(--s6)}
   .modalFoot{padding:var(--s4) var(--s6) var(--s5)}
 
-  /* ---- settings tab workspace ---- */
-  .setTabs{display:flex;gap:var(--s1);border-bottom:1px solid var(--line);margin-bottom:var(--s5);flex-wrap:wrap}
-  .setTab{border:0;background:transparent;padding:10px var(--s4);font-weight:700;font-size:var(--fs-2);color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;min-height:42px;border-radius:var(--r-sm) var(--r-sm) 0 0;transition:color var(--dur-1) var(--ease),background var(--dur-1) var(--ease),border-color var(--dur-1) var(--ease)}
+  /* ---- settings tab workspace (desktop polish only) ---- */
+  .setTabs{gap:var(--s1);margin-bottom:var(--s5);position:static}
+  .setTab{padding:10px var(--s4);transition:color var(--dur-1) var(--ease),background var(--dur-1) var(--ease),border-color var(--dur-1) var(--ease)}
   .setTab:hover{color:var(--ink);background:var(--surface-2)}
-  .setTab.active{color:var(--g2);border-bottom-color:var(--g)}
-  .setTab.danger{background:transparent;border:0;border-bottom:2px solid transparent;color:#96241d}
   .setTab.danger:hover{background:#fdeceb}
-  .setTab.danger.active{border-bottom-color:var(--danger)}
-  .setPanes{display:block}
-  .setPane{display:none}
-  .setPane.active{display:block;animation:paneIn var(--dur-2) var(--ease)}
+  .setPane.active{animation:paneIn var(--dur-2) var(--ease)}
   @keyframes paneIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
   .setPane .card+.card{margin-top:var(--s5)}
 
@@ -548,8 +563,6 @@ tr.bad>td{background:#fff7f6}
 }
 @media (max-width:1023px){
   .navCollapse{display:none}
-  .setTabs{display:none!important}
-  .setPane{display:block!important}
 }
 @media (prefers-reduced-motion:reduce){
   .page.active,.modalbox,.setPane.active,.toast{animation:none!important}
@@ -578,13 +591,17 @@ tr.bad>td{background:#fff7f6}
 </section>
 <section id="cash" class="page"><div class="pageHead"><div><h2>Cash Transactions</h2><div class="pageSub">Record manual cash movements — expenses, owner capital, loans and drawings — outside the linked sales, purchase and collection modules.</div></div></div><div class="notice">Use Sales, Purchases and Collections modules for linked business events. Manual cash is for legitimate items such as expenses, owner capital, loans, drawings and other cash movements.</div><div class="card"><div class="row"><div class="field"><label>Date</label><input id="cashDate" type="date"></div><div class="field"><label>Direction</label><select id="cashDir"><option value="in">Cash In</option><option value="out">Cash Out</option></select></div><div class="field"><label>Business Cash Type</label><div class="cashSelect" id="cashCatWrap"><input id="cashCat" type="hidden"><button type="button" class="cashSelectBtn" id="cashCatBtn" aria-haspopup="listbox" aria-expanded="false">Select category <span>▾</span></button><div class="cashSelectMenu" id="cashCatMenu" role="listbox"></div></div></div><div class="field"><label>Amount</label><input id="cashAmt" type="number" min="0" step=".01"></div><div class="field"><label>Description / Reference</label><input id="cashDesc" maxlength="500"></div><button id="cashSaveBtn" class="primary" onclick="saveCash()">Save</button></div></div><div class="card" style="margin-top:12px"><div id="cashTable"></div></div></section>
 <section id="inventory" class="page"><div class="pageHead"><div><h2>Inventory</h2><div class="pageSub">Products with their lot-level stock and expiry, the expired-stock approval queue, manual spoilage and stocktake snapshots — valued at weighted-average cost.</div></div></div><div class="invTabs" id="invTabs" role="tablist" aria-label="Inventory sections"></div><div class="invPanel active" id="invPanel-stock" role="tabpanel" aria-labelledby="invTab-stock" tabindex="0"><div class="actions toolbar"><button class="primary" onclick="openProduct()">+ Add Product</button><button class="secondary" onclick="downloadPath('/products/template')">⬇ Product Template</button><label class="secondary">⬆ Import Products <input id="importFile" type="file" accept=".xlsx,.xls,.csv" hidden></label><button class="secondary" onclick="downloadPath('/inventory/lots/template')">⬇ Stock-In / Lot Template</button><label class="secondary">⬆ Import Stock-In Lots <input id="lotImportFile" type="file" accept=".xlsx,.xls,.csv" hidden></label><button class="secondary" onclick="toggleArchived()" id="archToggleBtn">Show Archived</button><button class="secondary" onclick="openReport('inventory')">Detailed Inventory Valuation</button></div><div class="notice">Inventory uses historical transaction costs and weighted-average costing for new purchases and sales. Inventory value is traceable to the movement ledger.<div class="dashboardExplain"><b>Expiry is tracked per lot / batch,</b> never on the product master. Sales consume stock <b>FEFO (First Expire, First Out)</b>, and expired lots are blocked from sales until they are approved in the <b>Queue</b> tab. Click a product row’s <b>Lots</b> button to see every batch, its expiry date and its status.</div></div><div class="card"><div class="field" style="max-width:420px;margin-bottom:10px"><label for="invSearch">Search inventory</label><input id="invSearch" type="search" autocomplete="off" placeholder="Search products..." aria-label="Search products" oninput="onInventorySearch(this.value)"><div id="invSearchCount" class="muted" style="margin-top:4px"></div></div><div id="productTable"></div></div></div><div class="invPanel" id="invPanel-queue" role="tabpanel" aria-labelledby="invTab-queue" tabindex="0"><div class="card"><h3><span class="invTabIcon" style="display:inline-flex;vertical-align:-3px;margin-right:6px"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M18 9a6 6 0 1 0-12 0c0 5-2 6-2 6h16s-2-1-2-6"/><path d="M10.3 20a2 2 0 0 0 3.4 0"/></svg></span>Automatic Spoilage / Wastage Queue</h3><div class="vb-info">Ang system automatic nga mo-detect og expired nga lot ug mo-text sa owner. <b>Walay ma-minus sa stock ug walay accounting entry</b> hangtod nga i-approve nimo diri.</div><div class="notice">This is the <b>only</b> place expired stock is written off. Approving an item reduces inventory at weighted-average cost and posts <b>Dr Spoilage / Wastage Expense, Cr Inventory</b>. Dismissing an item closes the request without touching stock or the books.</div><div id="spoilQueueSummary" class="muted" style="margin-top:8px" role="status" aria-live="polite"></div><div class="actions toolbar" style="margin-top:8px"><button class="secondary" onclick="scanSpoilageQueue()" id="spoilQueueScanBtn">Scan Expired Stock Now</button><div class="field" style="max-width:320px"><label for="spoilQueueSearch">Search queue</label><input id="spoilQueueSearch" type="search" autocomplete="off" placeholder="Search pending items..." aria-label="Search spoilage queue" oninput="onSpoilageQueueSearch(this.value)"></div></div><div id="spoilageQueueTable" style="margin-top:10px"></div></div></div><div class="invPanel" id="invPanel-spoilage" role="tabpanel" aria-labelledby="invTab-spoilage" tabindex="0"><div class="card"><h3>Manual Spoilage / Wastage</h3><div class="notice">Use Manual Spoilage / Wastage for <b>physical losses</b> such as damage, rot, wilt, overripe stock, dropped, contaminated or otherwise unsellable inventory. <b>Expired stock is handled through the Automatic Spoilage / Wastage Queue.</b><div class="actions" style="margin-top:8px"><button class="secondary" onclick="goPage('inventory','queue')">Review Queue</button></div></div><div class="vb-info">Kung madaot, malata, malaya, o dili na baligya ang prutas/gulay, i-record diri. Ang system mo-minus sa inventory gamit ang weighted-average cost ug mo-record og separate Spoilage / Wastage Expense. Ang <b>expired</b> nga lot, didto sa Queue i-approve.</div><div class="row" style="margin-top:10px"><div class="field"><label>Date</label><input id="spoilageDate" type="date"></div><div class="field"><label>Product</label><select id="spoilageProduct"></select></div><div class="field"><label>Lot / Batch</label><select id="spoilageLot"><option value="">Automatic (expired first, then FEFO)</option></select></div><div class="field"><label>Spoiled Quantity</label><input id="spoilageQty" type="number" min="0.001" step=".001"></div><div class="field"><label>Reason</label><input id="spoilageReason" maxlength="200" placeholder="Rotten, overripe, damaged, etc."></div><button id="spoilageBtn" class="danger" onclick="recordSpoilage()">Record Spoilage</button></div><div id="spoilageLotHint" class="vb-info" style="margin-top:8px"></div><div class="vb-info">Ang spoilage dili i-count as sales ug dili pud siya i-add sa cash outflow. Inventory loss siya nga na-convert ngadto sa Spoilage / Wastage Expense.</div></div></div><div class="invPanel" id="invPanel-stocktake" role="tabpanel" aria-labelledby="invTab-stocktake" tabindex="0"><div class="card"><h3>System Stocktake Snapshot</h3><div class="row"><div class="field"><label>As of</label><input id="stockDate" type="date"></div><div class="field"><label>Notes</label><input id="stockNotes"></div><button class="primary" onclick="recordStocktake()">Save Stocktake Snapshot</button></div><div id="stockResult" class="muted" style="margin-top:8px"></div><div class="vb-info" style="margin-top:8px">Ang snapshot mo-record sa system quantity. I-butang ang <b>actual nga na-count</b> sa ubos aron ma-reconcile ang physical stock ug automatic nga mag-post ang variance adjustment.</div><div class="field" style="max-width:420px;margin-top:10px"><label for="snapSearch">Search snapshot</label><input id="snapSearch" type="search" autocomplete="off" placeholder="Search products..." aria-label="Search snapshot products" oninput="onSnapshotSearch(this.value)"></div><div id="stocktakeCount" style="margin-top:10px"></div></div></div></section>
-<section id="sales" class="page"><div class="pageHead"><div><h2>Sales</h2><div class="pageSub">Record cash and credit sales. Stock is consumed first-expire-first-out and posted to the books automatically.</div></div></div><div class="card"><div class="row"><div class="field"><label>Date</label><input id="saleDate" type="date"></div><div class="field"><label>Customer</label><input id="saleCustomer"></div><div class="field"><label>Product</label><select id="saleProduct"></select></div><div class="field"><label>Quantity</label><input id="saleQty" type="number" min="0.001" step=".001"></div><div class="field"><label>Selling Price / Unit</label><input id="salePrice" type="number" min="0.01" step=".01"></div><div class="field"><label>Discount</label><input id="saleDiscount" type="number" min="0" step=".01" value="0"></div><div class="field"><label>Payment</label><select id="saleStatus"><option>Credit</option><option>Cash</option></select></div><button id="saleBtn" class="primary" onclick="saveSale()">Record Sale</button></div></div><div class="card" style="margin-top:12px"><div id="salesTable"></div></div></section>
-<section id="purchases" class="page"><div class="pageHead"><div><h2>Purchases</h2><div class="pageSub">Record supplier purchases with lot code and expiry so inventory costing and expiry tracking stay accurate.</div></div></div><div class="card"><div class="row"><div class="field"><label>Date</label><input id="purchaseDate" type="date"></div><div class="field"><label>Supplier</label><input id="purchaseSupplier"></div><div class="field"><label>Product</label><select id="purchaseProduct"></select></div><div class="field"><label>Quantity</label><input id="purchaseQty" type="number" min="0.001" step=".001"></div><div class="field"><label>Actual Unit Cost</label><input id="purchaseCost" type="number" min="0.01" step=".01"></div><div class="field"><label>Lot / Batch Code</label><input id="purchaseLot" maxlength="60"></div><div class="field"><label>Expiry Date</label><input id="purchaseExpiry" type="date"></div><div class="field"><label>Payment</label><select id="purchaseStatus"><option>Credit</option><option>Cash</option></select></div><button id="purchaseBtn" class="primary" onclick="savePurchase()">Record Purchase</button></div></div><div class="card" style="margin-top:12px"><div id="purchaseTable"></div></div></section>
+<section id="sales" class="page"><div class="pageHead"><div><h2>Sales</h2><div class="pageSub">Record cash and credit sales. Stock is consumed first-expire-first-out and posted to the books automatically.</div></div></div><div class="card"><div class="row"><div class="field"><label>Date</label><input id="saleDate" type="date"></div><div class="field"><label>Customer</label><input id="saleCustomer"></div><div class="field"><label>Product</label><select id="saleProduct"></select></div><div class="field"><label>Quantity</label><input id="saleQty" type="number" min="0.001" step=".001"></div><div class="field"><label>Selling Price / Unit</label><input id="salePrice" type="number" min="0.01" step=".01"></div><div class="field"><label>Discount</label><input id="saleDiscount" type="number" min="0" step=".01" value="0"></div><div class="field"><label>Payment</label><select id="saleStatus"><option>Credit</option><option>Cash</option></select></div><button id="saleAddBtn" class="primary" onclick="addSaleToCart()">Add to Cart</button></div></div>
+<div class="card posCart" id="saleCartCard" style="margin-top:12px"><div class="posCartHead"><h3 style="margin:0">Current Sale Cart</h3><button class="secondary" id="saleClearBtn" onclick="clearSaleCart()">Clear Cart</button></div><div id="saleCartBody"></div><div class="posCartFoot"><div class="posTotals" id="saleCartTotals"></div><button id="saleBtn" class="primary posCheckout" onclick="saveSale()" disabled>Record Sale</button></div></div>
+<div class="card" style="margin-top:12px"><div id="salesTable"></div></div></section>
+<section id="purchases" class="page"><div class="pageHead"><div><h2>Purchases</h2><div class="pageSub">Record supplier purchases with lot code and expiry so inventory costing and expiry tracking stay accurate.</div></div></div><div class="card"><div class="row"><div class="field"><label>Date</label><input id="purchaseDate" type="date"></div><div class="field"><label>Supplier</label><input id="purchaseSupplier"></div><div class="field"><label>Product</label><select id="purchaseProduct"></select></div><div class="field"><label>Quantity</label><input id="purchaseQty" type="number" min="0.001" step=".001"></div><div class="field"><label>Actual Unit Cost</label><input id="purchaseCost" type="number" min="0.01" step=".01"></div><div class="field"><label>Lot / Batch Code</label><input id="purchaseLot" maxlength="60"></div><div class="field"><label>Expiry Date</label><input id="purchaseExpiry" type="date"></div><div class="field"><label>Payment</label><select id="purchaseStatus"><option>Credit</option><option>Cash</option></select></div><button id="purchaseAddBtn" class="primary" onclick="addPurchaseToCart()">Add to Cart</button></div></div>
+<div class="card posCart" id="purchaseCartCard" style="margin-top:12px"><div class="posCartHead"><h3 style="margin:0">Current Purchase Cart</h3><button class="secondary" id="purchaseClearBtn" onclick="clearPurchaseCart()">Clear Cart</button></div><div id="purchaseCartBody"></div><div class="posCartFoot"><div class="posTotals" id="purchaseCartTotals"></div><button id="purchaseBtn" class="primary posCheckout" onclick="savePurchase()" disabled>Record Purchase</button></div></div>
+<div class="card" style="margin-top:12px"><div id="purchaseTable"></div></div></section>
 <section id="collections" class="page"><div class="pageHead"><div><h2>Customer Collections / Receivables</h2><div class="pageSub">Apply customer payments against credit sales. Collections reduce Accounts Receivable and never create new revenue.</div></div></div><div class="notice">A collection reduces Accounts Receivable; it does NOT create new revenue. Link a collection to an actual credit sale whenever possible.</div><div class="card"><div class="row"><div class="field"><label>Date</label><input id="collectionDate" type="date"></div><div class="field"><label>Customer</label><input id="collectionCustomer"></div><div class="field"><label>Credit Sale / Invoice</label><select id="collectionSale"></select></div><div class="field"><label>Amount</label><input id="collectionAmount" type="number" min="0.01" step=".01"></div><div class="field"><label>Reference</label><input id="collectionRef"></div><button class="primary" onclick="saveCollection()">Record Collection</button></div></div><div class="card" style="margin-top:12px"><div id="collectionTable"></div></div></section>
 <section id="reports" class="page"><div class="pageHead"><div><h2>Detailed Financial Reports</h2><div class="pageSub">Income Statement, Cash Flow, Balance Sheet and supporting schedules — every figure is traceable to its source record.</div></div></div><div class="card filterCard"><div class="row filterRow"><div class="field"><label>Period</label><select id="period"><option value="day">Day</option><option value="week">Week</option><option value="month" selected>Month</option><option value="year">Year</option><option value="custom">Custom Date Range</option></select></div><div class="field"><label>From / As-of</label><input id="fromDate" type="date"></div><div class="field"><label>To</label><input id="toDate" type="date"></div><button class="secondary" onclick="applyReportPeriod()">Apply</button><button class="primary" onclick="downloadReport()">⬇ Download Detailed Excel</button></div></div><div class="notice"><b>Every major figure below is clickable.</b> Follow <b>Summary → Category → Transaction → Source Record</b> to understand exactly where the number came from.<div class="vb-info">Dili lang ni consolidated total. I-click ang amount para ma-trace nimo ang actual sales, purchases, collections, expenses, inventory movements, ug spoilage.</div></div><div id="reportCards" class="grid"></div></section>
 <section id="settings" class="page">
 <div class="pageHead"><div><h2>Settings</h2><div class="pageSub">Branding, receipts, owner SMS alerts, backups and system maintenance for this installation.</div></div></div>
-<div class="setTabs" id="settingsTabs" role="tablist" aria-label="Settings sections"><button type="button" role="tab" id="setTab-general" class="setTab active" aria-selected="true" aria-controls="setPane-general" tabindex="0" data-settab="general" onclick="settingsTab('general')">General & Branding</button><button type="button" role="tab" id="setTab-receipt" class="setTab" aria-selected="false" aria-controls="setPane-receipt" tabindex="-1" data-settab="receipt" onclick="settingsTab('receipt')">Receipt</button><button type="button" role="tab" id="setTab-sms" class="setTab" aria-selected="false" aria-controls="setPane-sms" tabindex="-1" data-settab="sms" onclick="settingsTab('sms')">SMS Alerts</button><button type="button" role="tab" id="setTab-smslog" class="setTab" aria-selected="false" aria-controls="setPane-smslog" tabindex="-1" data-settab="smslog" onclick="settingsTab('smslog')">SMS History</button><button type="button" role="tab" id="setTab-backup" class="setTab" aria-selected="false" aria-controls="setPane-backup" tabindex="-1" data-settab="backup" onclick="settingsTab('backup')">Backup & Restore</button><button type="button" role="tab" id="setTab-system" class="setTab" aria-selected="false" aria-controls="setPane-system" tabindex="-1" data-settab="system" onclick="settingsTab('system')">System</button><button type="button" role="tab" id="setTab-danger" class="setTab danger" aria-selected="false" aria-controls="setPane-danger" tabindex="-1" data-settab="danger" onclick="settingsTab('danger')">Danger Zone</button></div>
+<div class="setTabs" id="settingsTabs" role="tablist" aria-label="Settings sections"><button type="button" role="tab" id="setTab-general" class="setTab active" aria-selected="true" aria-controls="setPane-general" tabindex="0" data-settab="general" onclick="settingsTab('general')"><span class="setTabFull">General & Branding</span><span class="setTabShort">General</span></button><button type="button" role="tab" id="setTab-receipt" class="setTab" aria-selected="false" aria-controls="setPane-receipt" tabindex="-1" data-settab="receipt" onclick="settingsTab('receipt')"><span class="setTabFull">Receipt</span><span class="setTabShort">Receipt</span></button><button type="button" role="tab" id="setTab-sms" class="setTab" aria-selected="false" aria-controls="setPane-sms" tabindex="-1" data-settab="sms" onclick="settingsTab('sms')"><span class="setTabFull">SMS Alerts</span><span class="setTabShort">SMS</span></button><button type="button" role="tab" id="setTab-smslog" class="setTab" aria-selected="false" aria-controls="setPane-smslog" tabindex="-1" data-settab="smslog" onclick="settingsTab('smslog')"><span class="setTabFull">SMS History</span><span class="setTabShort">History</span></button><button type="button" role="tab" id="setTab-backup" class="setTab" aria-selected="false" aria-controls="setPane-backup" tabindex="-1" data-settab="backup" onclick="settingsTab('backup')"><span class="setTabFull">Backup & Restore</span><span class="setTabShort">Backup</span></button><button type="button" role="tab" id="setTab-system" class="setTab" aria-selected="false" aria-controls="setPane-system" tabindex="-1" data-settab="system" onclick="settingsTab('system')"><span class="setTabFull">System</span><span class="setTabShort">System</span></button><button type="button" role="tab" id="setTab-danger" class="setTab danger" aria-selected="false" aria-controls="setPane-danger" tabindex="-1" data-settab="danger" onclick="settingsTab('danger')"><span class="setTabFull">Danger Zone</span><span class="setTabShort">Danger</span></button></div>
 <div class="setPanes" id="settingsPanes">
 <div class="setPane" id="setPane-backup" data-setpane="backup" role="tabpanel" aria-labelledby="setTab-backup">
   <div class="card"><h3 style="margin-top:0">Backup & Restore</h3><p class="muted">Create a complete white-label backup containing the SQLite database, settings, and uploaded branding assets.</p><div class="notice"><b>Backup file:</b> <code>.vegebak</code><br>This is the system's self-contained backup format. Legacy <code>.sqlite3</code> backups remain restorable.</div><div class="actions"><button class="primary" onclick="downloadBackup()">⬇ Download Full Backup</button><label class="secondary" style="cursor:pointer">↥ Restore Backup<input id="restoreFile" type="file" accept=".vegebak,.sqlite3,application/octet-stream" style="display:none" onchange="restoreBackup()"></label></div><div id="backupStatus" class="muted"></div></div>
@@ -660,7 +677,7 @@ async function api(path,opt={}){const headers={'Accept':'application/json','X-VE
 function showToast(msg,bad=false){const t=$('toast');t.textContent=msg;t.style.background=bad?'#7d201b':'#173a29';t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3500)}
 function showAuth(){if(realtimeConnection){try{realtimeConnection.close()}catch{}realtimeConnection=null}document.querySelectorAll('#appHeader,#nav,#appMain,#sidebar,#sidebarOverlay,#mobileNav').forEach(x=>x.classList.add('hidden'));$('auth').classList.remove('hidden');refreshInstallUi()}
 function showAppShell(){document.querySelectorAll('#appHeader,#nav,#appMain,#sidebar,#mobileNav').forEach(x=>x.classList.remove('hidden'));$('auth').classList.add('hidden');$('sidebarOverlay').classList.remove('open');refreshInstallUi()}
-async function boot(){if(!token()){showAuth();return false}try{const st=await api('/settings');settings=st.settings||{};applyBranding(settings);writeCachedBranding(publicBrandSubset(settings));preloadCriticalBranding(settings);showAppShell();showInvTab(invTab,false);connectRealtime().catch(()=>{});load().catch(()=>{});refreshQueueCount().catch(()=>{});return true}catch(e){if(!token())showAuth();else showToast(e.message,true);return false}}
+async function boot(){if(!token()){showAuth();return false}try{const st=await api('/settings');settings=st.settings||{};applyBranding(settings);writeCachedBranding(publicBrandSubset(settings));preloadCriticalBranding(settings);showAppShell();showInvTab(invTab,false);loadCarts();connectRealtime().catch(()=>{});load().catch(()=>{});refreshQueueCount().catch(()=>{});return true}catch(e){if(!token())showAuth();else showToast(e.message,true);return false}}
 function publicBrandSubset(s){const out={};for(const k of ['companyName','tagline','primaryColor','secondaryColor','backgroundColor','loadingLogo','browserLogo','desktopIcon','favicon'])if(s&&s[k]!==undefined)out[k]=s[k];out.brandingVersion=s?.brandingVersion||s?._brandingVersion||'';return out}
 // Fast start: paint the last known branding synchronously from cache so the
 // splash never waits on the network, then do exactly ONE settings request
@@ -781,7 +798,7 @@ async function loadSmsSettings(){const box=$('smsGatewayStatus');if(!box)return;
 }catch(e){box.className='notice bad';box.textContent='Could not load SMS settings: '+e.message}}
 async function loadSmsStatus(){const el=$('smsStatusBody');if(!el)return;try{const s=await api('/sms/status');const q=s.queue||{};
  el.innerHTML=`Alerts: <b>${s.enabled?'On':'Off'}</b> · Number: <b>${s.hasOwnerNumber?s.ownerNumberMasked:'not set'}</b> · Queued: <b>${num(q.queued)}</b> · Sent: <b>${num(q.sent)}</b> · Failed: <b>${num(q.failed)}</b> · Watching: <b>${num(s.pendingEvents)}</b> open issue(s)`
-  +(s.lastScanAt?`<br>Last check: ${new Date(s.lastScanAt).toLocaleString()}`:'')
+  +(s.lastScanAt?`<br>Last check: ${smsWhen(s.lastScanAt)}`:'')
   +(s.lastErrorKind?`<br><span style="color:#8f211b">Last send problem: ${s.lastErrorKind}</span>`:'');
 }catch(e){el.textContent=''}}
 function smsPayload(){const cats={},th={};for(const [k] of SMS_CATS)cats[k]=$('smsCat_'+k)?.checked||false;for(const [k] of SMS_THRESH)th[k]=num($('smsTh_'+k)?.value);
@@ -793,10 +810,32 @@ async function sendSmsTest(){try{await api('/sms/test',{method:'POST',headers:{'
 async function runSmsScan(){try{await api('/sms/scan',{method:'POST'});showToast('Safety check complete');loadSmsStatus();loadSmsHistory()}catch(e){showToast(e.message,true)}}
 async function sendSmsSummary(){try{await api('/sms/summary',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({kind:'daily'})});showToast('Summary SMS queued');loadSmsStatus();loadSmsHistory()}catch(e){showToast(e.message,true)}}
 async function retryFailedSms(){try{const r=await api('/sms/retry',{method:'POST'});showToast('Requeued '+num(r.requeued)+' message(s)');loadSmsStatus();loadSmsHistory()}catch(e){showToast(e.message,true)}}
+// Timestamps from the database are SQLite CURRENT_TIMESTAMP values in UTC with no
+// timezone marker ("2026-08-26 01:57:24"). Parsing them directly makes the browser
+// treat them as local time, shifting every SMS row by the timezone offset. Normalise
+// to UTC first so the displayed time is the real send attempt time.
+function smsDate(value){
+  if(!value)return null;
+  if(value instanceof Date)return isNaN(value)?null:value;
+  const raw=String(value).trim();if(!raw)return null;
+  const iso=/[Zz]|[+-]\d{2}:?\d{2}$/.test(raw)?raw:(raw.includes('T')?raw+'Z':raw.replace(' ','T')+'Z');
+  const d=new Date(iso);return isNaN(d)?null:d;
+}
+function smsWhen(value){const d=smsDate(value);if(!d)return '—';
+  return d.toLocaleDateString(undefined,{year:'numeric',month:'short',day:'2-digit'})+', '+d.toLocaleTimeString(undefined,{hour:'2-digit',minute:'2-digit',second:'2-digit'});}
+function smsWhenCell(m){
+  const attempt=m.sent_at||m.failed_at||m.delivered_at||m.next_attempt_at||m.at;
+  const d=smsDate(attempt);if(!d)return '—';
+  const queued=smsDate(m.at);
+  const dateLine=d.toLocaleDateString(undefined,{year:'numeric',month:'short',day:'2-digit'});
+  const timeLine=d.toLocaleTimeString(undefined,{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  const sub=(queued&&Math.abs(queued-d)>=1000)?`<br><span class="muted" style="font-size:11px">queued ${queued.toLocaleTimeString(undefined,{hour:'2-digit',minute:'2-digit',second:'2-digit'})}</span>`:'';
+  return `${dateLine}<br><b>${timeLine}</b>${sub}`;
+}
 async function loadSmsHistory(){const el=$('smsHistoryBody');if(!el)return;try{const r=await api('/sms/history?limit=50');const rows=r.messages||[];
  if(!rows.length){el.textContent='No SMS alerts yet.';return}
- el.innerHTML=`<div class="tablewrap"><table><thead><tr><th>When</th><th>Type</th><th>Priority</th><th>Status</th><th>Message</th></tr></thead><tbody>`+
- rows.map(m=>`<tr><td>${new Date(m.at).toLocaleString()}</td><td>${m.category}${m.part?' ('+m.part+')':''}</td><td>${m.severity}</td>
+ el.innerHTML=`<div class="tablewrap"><table><thead><tr><th>When (attempt)</th><th>Type</th><th>Priority</th><th>Status</th><th>Message</th></tr></thead><tbody>`+
+ rows.map(m=>`<tr><td style="white-space:nowrap">${smsWhenCell(m)}</td><td>${m.category}${m.part?' ('+m.part+')':''}</td><td>${m.severity}</td>
   <td>${m.status}${m.delivery&&m.delivery!==m.status?' / '+m.delivery:''}${m.attempts>1?' · try '+m.attempts:''}${m.error_kind?'<br><span style="color:#8f211b">'+m.error_kind+'</span>':''}</td>
   <td style="white-space:pre-wrap">${(m.preview||'').replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]))}</td></tr>`).join('')+`</tbody></table></div>`;
 }catch(e){el.textContent='Could not load history: '+e.message}}
@@ -1118,8 +1157,132 @@ function renderSales(){$('salesTable').innerHTML=tab(['ID','Date','Customer','Pr
 function renderPurchases(){$('purchaseTable').innerHTML=tab(['ID','Date','Supplier','Product','Qty','Unit Cost','Total','Payment','Detail'],purchases.map(x=>[x.id,esc(x.date),esc(x.supplier),esc(x.product_name),num(x.quantity).toFixed(3),money(x.unit_cost),money(x.total),esc(x.payment_status),`<button class="secondary small" onclick="openTransaction('purchase',${x.id})">View</button>`]));}
 function renderCollections(){$('collectionTable').innerHTML=tab(['ID','Date','Customer','Amount','Reference','Sale Link','Detail'],collections.map(x=>[x.id,esc(x.date),esc(x.customer),money(x.amount),esc(x.reference),x.sale_id?`Sale #${x.sale_id}`:'Unallocated',`<button class="secondary small" onclick="openTransaction('collection',${x.id})">View</button>`]));}
 async function saveCash(){const btn=$('cashSaveBtn');btn.disabled=true;try{await api('/cash',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({date:$('cashDate').value,direction:$('cashDir').value,category:$('cashCat').value,amount:Number($('cashAmt').value),description:$('cashDesc').value})});$('cashAmt').value='';$('cashDesc').value='';showToast('Cash transaction saved.');await load()}catch(e){showToast(e.message,true)}finally{btn.disabled=false}}
-async function saveSale(){const btn=$('saleBtn');btn.disabled=true;try{const p=products.find(x=>x.id==$('saleProduct').value);if(!p)throw Error('Select a product.');const r=await api('/sales',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({date:$('saleDate').value,customer:$('saleCustomer').value,product_id:p.id,quantity:Number($('saleQty').value),price:Number($('salePrice').value||p.selling_price),discount:Number($('saleDiscount').value||0),payment_status:$('saleStatus').value})});$('saleQty').value='';$('saleDiscount').value='0';const fefo=(r.lot_allocations||[]).filter(a=>a.lot_id).map(a=>`${a.lot_code||'Lot #'+a.lot_id}${a.expiry_date?' (exp '+a.expiry_date+')':''} × ${num(a.quantity).toFixed(3)}`).join(', ');showToast(`Sale #${r.id} saved. COGS: ${money(r.cost)} • Unit cost: ${money(r.unit_cost)}${fefo?` • FEFO: ${fefo}`:''}`);await load()}catch(e){showToast(e.message,true)}finally{btn.disabled=false}}
-async function savePurchase(){const btn=$('purchaseBtn');btn.disabled=true;try{const p=products.find(x=>x.id==$('purchaseProduct').value);if(!p)throw Error('Select a product.');const r=await api('/purchases',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({date:$('purchaseDate').value,supplier:$('purchaseSupplier').value,product_id:p.id,quantity:Number($('purchaseQty').value),unit_cost:Number($('purchaseCost').value||p.unit_cost),batch_lot:$('purchaseLot').value,expiry_date:$('purchaseExpiry').value,payment_status:$('purchaseStatus').value})});$('purchaseQty').value='';$('purchaseExpiry').value='';showToast(`Purchase #${r.id} saved. New weighted-average cost: ${money(r.newWeightedAverageCost)}`);await load()}catch(e){showToast(e.message,true)}finally{btn.disabled=false}}
+/* ==========================================================================
+   POS-style carts for Sales and Purchases.
+   Nothing touches the books until the owner taps Record Sale / Record Purchase;
+   each cart line is then posted to the same /api/sales and /api/purchases
+   endpoints as before, so costing, FEFO and accounting are unchanged.
+   ========================================================================== */
+let saleCart=[],purchaseCart=[];
+function loadCarts(){
+  try{saleCart=JSON.parse(sessionStorage.getItem('vege_sale_cart')||'[]')||[]}catch{saleCart=[]}
+  try{purchaseCart=JSON.parse(sessionStorage.getItem('vege_purchase_cart')||'[]')||[]}catch{purchaseCart=[]}
+  if(!Array.isArray(saleCart))saleCart=[];if(!Array.isArray(purchaseCart))purchaseCart=[];
+  renderSaleCart();renderPurchaseCart();
+}
+function persistCarts(){try{sessionStorage.setItem('vege_sale_cart',JSON.stringify(saleCart));sessionStorage.setItem('vege_purchase_cart',JSON.stringify(purchaseCart))}catch{}}
+
+/* ---------------- sales cart ---------------- */
+function saleLineTotals(l){const gross=num(l.quantity)*num(l.price);return {gross,discount:num(l.discount),net:gross-num(l.discount)}}
+function addSaleToCart(){
+  try{
+    const p=products.find(x=>x.id==$('saleProduct').value);if(!p)throw Error('Select a product.');
+    const date=$('saleDate').value;if(!date)throw Error('Enter the sale date.');
+    const quantity=Number($('saleQty').value);if(!(quantity>0))throw Error('Quantity must be greater than zero.');
+    const price=Number($('salePrice').value||p.selling_price);if(!(price>0))throw Error('Selling price must be greater than zero.');
+    const discount=Number($('saleDiscount').value||0);if(discount<0)throw Error('Discount cannot be negative.');
+    if(discount>quantity*price+0.005)throw Error('Discount cannot exceed the gross amount of this line.');
+    const line={date,customer:$('saleCustomer').value,product_id:p.id,product_name:p.name,unit:p.unit||'',quantity,price,discount,payment_status:$('saleStatus').value};
+    const same=saleCart.find(l=>l.product_id===line.product_id&&l.price===line.price&&l.payment_status===line.payment_status&&l.date===line.date&&(l.customer||'')===(line.customer||''));
+    if(same){same.quantity=num(same.quantity)+quantity;same.discount=num(same.discount)+discount;same.error=null}
+    else saleCart.push(line);
+    $('saleQty').value='';$('saleDiscount').value='0';
+    renderSaleCart();showToast(`${p.name} added to cart.`);
+  }catch(e){showToast(e.message,true)}
+}
+function removeSaleLine(i){saleCart.splice(i,1);renderSaleCart()}
+function clearSaleCart(){if(!saleCart.length)return;saleCart=[];renderSaleCart();showToast('Sale cart cleared.')}
+function renderSaleCart(){
+  const body=$('saleCartBody'),totals=$('saleCartTotals'),btn=$('saleBtn'),clear=$('saleClearBtn');
+  if(!body)return;
+  if(!saleCart.length){
+    body.innerHTML='<div class="empty muted">Cart is empty. Fill the form above and tap <b>Add to Cart</b>.</div>';
+    if(totals)totals.innerHTML='<span class="muted">0 item(s) in cart</span>';
+    if(btn){btn.disabled=true;btn.textContent='Record Sale'}
+    if(clear)clear.disabled=true;persistCarts();return;
+  }
+  let gross=0,disc=0;
+  const rows=saleCart.map((l,i)=>{const t=saleLineTotals(l);gross+=t.gross;disc+=t.discount;
+    return `<tr><td>${esc(l.product_name)}${l.error?`<div class="posLineErr">${esc(l.error)}</div>`:''}</td><td>${num(l.quantity).toFixed(3)} ${esc(l.unit)}</td><td>${money(l.price)}</td><td>${money(l.discount)}</td><td>${money(t.net)}</td><td>${esc(l.payment_status)}</td><td><button class="secondary" onclick="removeSaleLine(${i})">Remove</button></td></tr>`}).join('');
+  body.innerHTML=`<div class="tablewrap"><table><thead><tr><th>Product</th><th>Qty</th><th>Price</th><th>Discount</th><th>Line Total</th><th>Payment</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`;
+  const net=gross-disc;
+  if(totals)totals.innerHTML=`${saleCart.length} line(s) · Gross ${money(gross)} · Discount ${money(disc)} · <b>Net ${money(net)}</b>`;
+  if(btn){btn.disabled=false;btn.textContent=`Record Sale • ${money(net)}`}
+  if(clear)clear.disabled=false;
+  persistCarts();
+}
+async function saveSale(){
+  const btn=$('saleBtn');if(!saleCart.length)return showToast('Add at least one item to the cart first.',true);
+  btn.disabled=true;btn.textContent='Recording…';
+  const ok=[],failed=[];let cost=0;const fefo=[];
+  for(const line of [...saleCart]){
+    try{
+      const r=await api('/sales',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({date:line.date,customer:line.customer,product_id:line.product_id,quantity:num(line.quantity),price:num(line.price),discount:num(line.discount),payment_status:line.payment_status})});
+      ok.push(r.id);cost+=num(r.cost);
+      (r.lot_allocations||[]).filter(a=>a.lot_id).forEach(a=>fefo.push(`${a.lot_code||'Lot #'+a.lot_id}${a.expiry_date?' (exp '+a.expiry_date+')':''} × ${num(a.quantity).toFixed(3)}`));
+      saleCart.splice(saleCart.indexOf(line),1);
+    }catch(e){line.error=e.message;failed.push(`${line.product_name}: ${e.message}`)}
+  }
+  renderSaleCart();
+  if(ok.length)showToast(`Recorded ${ok.length} sale(s) (#${ok.join(', #')}). Total COGS: ${money(cost)}${fefo.length?` • FEFO: ${fefo.slice(0,4).join(', ')}`:''}`);
+  if(failed.length)showToast(`${failed.length} line(s) not recorded — ${failed[0]}`,true);
+  try{await load()}catch{}
+  renderSaleCart();
+}
+
+/* ---------------- purchases cart ---------------- */
+function purchaseLineTotal(l){return num(l.quantity)*num(l.unit_cost)}
+function addPurchaseToCart(){
+  try{
+    const p=products.find(x=>x.id==$('purchaseProduct').value);if(!p)throw Error('Select a product.');
+    const date=$('purchaseDate').value;if(!date)throw Error('Enter the purchase date.');
+    const quantity=Number($('purchaseQty').value);if(!(quantity>0))throw Error('Quantity must be greater than zero.');
+    const unit_cost=Number($('purchaseCost').value||p.unit_cost);if(!(unit_cost>0))throw Error('Unit cost must be greater than zero.');
+    const expiry_date=$('purchaseExpiry').value||'';
+    if(expiry_date&&expiry_date<date)throw Error('Expiry date cannot be earlier than the purchase date.');
+    // Lot code and expiry are never merged: each lot must stay traceable.
+    purchaseCart.push({date,supplier:$('purchaseSupplier').value,product_id:p.id,product_name:p.name,unit:p.unit||'',quantity,unit_cost,batch_lot:$('purchaseLot').value,expiry_date,payment_status:$('purchaseStatus').value});
+    $('purchaseQty').value='';$('purchaseExpiry').value='';$('purchaseLot').value='';
+    renderPurchaseCart();showToast(`${p.name} added to cart.`);
+  }catch(e){showToast(e.message,true)}
+}
+function removePurchaseLine(i){purchaseCart.splice(i,1);renderPurchaseCart()}
+function clearPurchaseCart(){if(!purchaseCart.length)return;purchaseCart=[];renderPurchaseCart();showToast('Purchase cart cleared.')}
+function renderPurchaseCart(){
+  const body=$('purchaseCartBody'),totals=$('purchaseCartTotals'),btn=$('purchaseBtn'),clear=$('purchaseClearBtn');
+  if(!body)return;
+  if(!purchaseCart.length){
+    body.innerHTML='<div class="empty muted">Cart is empty. Fill the form above and tap <b>Add to Cart</b>.</div>';
+    if(totals)totals.innerHTML='<span class="muted">0 item(s) in cart</span>';
+    if(btn){btn.disabled=true;btn.textContent='Record Purchase'}
+    if(clear)clear.disabled=true;persistCarts();return;
+  }
+  let total=0;
+  const rows=purchaseCart.map((l,i)=>{const t=purchaseLineTotal(l);total+=t;
+    return `<tr><td>${esc(l.product_name)}${l.error?`<div class="posLineErr">${esc(l.error)}</div>`:''}</td><td>${num(l.quantity).toFixed(3)} ${esc(l.unit)}</td><td>${money(l.unit_cost)}</td><td>${esc(l.batch_lot||'—')}</td><td>${esc(l.expiry_date||'—')}</td><td>${money(t)}</td><td>${esc(l.payment_status)}</td><td><button class="secondary" onclick="removePurchaseLine(${i})">Remove</button></td></tr>`}).join('');
+  body.innerHTML=`<div class="tablewrap"><table><thead><tr><th>Product</th><th>Qty</th><th>Unit Cost</th><th>Lot</th><th>Expiry</th><th>Line Total</th><th>Payment</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`;
+  if(totals)totals.innerHTML=`${purchaseCart.length} line(s) · <b>Total ${money(total)}</b>`;
+  if(btn){btn.disabled=false;btn.textContent=`Record Purchase • ${money(total)}`}
+  if(clear)clear.disabled=false;
+  persistCarts();
+}
+async function savePurchase(){
+  const btn=$('purchaseBtn');if(!purchaseCart.length)return showToast('Add at least one item to the cart first.',true);
+  btn.disabled=true;btn.textContent='Recording…';
+  const ok=[],failed=[];let wac=null;
+  for(const line of [...purchaseCart]){
+    try{
+      const r=await api('/purchases',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({date:line.date,supplier:line.supplier,product_id:line.product_id,quantity:num(line.quantity),unit_cost:num(line.unit_cost),batch_lot:line.batch_lot,expiry_date:line.expiry_date,payment_status:line.payment_status})});
+      ok.push(r.id);wac=r.newWeightedAverageCost;
+      purchaseCart.splice(purchaseCart.indexOf(line),1);
+    }catch(e){line.error=e.message;failed.push(`${line.product_name}: ${e.message}`)}
+  }
+  renderPurchaseCart();
+  if(ok.length)showToast(`Recorded ${ok.length} purchase(s) (#${ok.join(', #')}).${wac!=null?` Latest weighted-average cost: ${money(wac)}`:''}`);
+  if(failed.length)showToast(`${failed.length} line(s) not recorded — ${failed[0]}`,true);
+  try{await load()}catch{}
+  renderPurchaseCart();
+}
 async function saveCollection(){try{const r=await api('/collections',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({date:$('collectionDate').value,customer:$('collectionCustomer').value,amount:Number($('collectionAmount').value),reference:$('collectionRef').value,sale_id:$('collectionSale').value||null})});showToast(`Collection #${r.id} saved. It reduced receivables.`);$('collectionAmount').value='';$('collectionRef').value='';await load()}catch(e){showToast(e.message,true)}}
 function openProduct(){$('productModal').classList.add('open')}function closeModal(id){$(id).classList.remove('open')}
 async function saveProduct(){try{const r=await api('/products',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:$('pName').value,sku:$('pSku').value,category:$('pCat').value,unit:$('pUnit').value,source_type:$('pSource').value,unit_cost:Number($('pCost').value||0),selling_price:Number($('pPrice').value||0),reorder_level:Number($('pReorder').value||0),is_perishable:Number($('pPerishable').value||0),has_expiration:Number($('pHasExp').value||0),shelf_life_days:Number($('pShelf').value||0),expiry_alert_days:Number($('pAlert').value||7),notes:$('pNotes').value,opening_qty:Number($('pOpen').value||0),opening_date:$('pOpenDate').value,opening_lot_code:$('pOpenLot').value,opening_expiry_date:$('pOpenExp').value})});closeModal('productModal');['pName','pSku','pCat','pCost','pPrice','pReorder','pOpen','pOpenLot','pOpenExp','pNotes'].forEach(id=>$(id).value='');showToast(`Product #${r.id} saved.`);await load()}catch(e){showToast(e.message,true)}}
@@ -1380,6 +1543,8 @@ function settingsTab(key){
   if(!tabs.some(t=>t.dataset.settab===key))key=tabs[0].dataset.settab;
   tabs.forEach(t=>{const on=t.dataset.settab===key;t.classList.toggle('active',on);t.setAttribute('aria-selected',on?'true':'false');t.tabIndex=on?0:-1});
   document.querySelectorAll('#settingsPanes .setPane').forEach(p=>p.classList.toggle('active',p.dataset.setpane===key));
+  const activeTab=document.getElementById('setTab-'+key);
+  try{activeTab?.scrollIntoView({block:'nearest',inline:'center'})}catch{}
   try{localStorage.setItem('vege_settings_tab',key)}catch{}
 }
 document.getElementById('settingsTabs')?.addEventListener('keydown',e=>{
