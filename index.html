@@ -192,6 +192,18 @@ label.secondary{cursor:pointer}
 .notice{padding:var(--s3) var(--s4);background:var(--tint);border-left:3px solid var(--g);border-radius:var(--r-sm);margin:var(--s3) 0;font-size:var(--fs-2);line-height:1.5}
 .notice.warn{background:#fff8e6;border-left-color:#c48700}
 .notice.bad{background:#fdeeec;border-left-color:var(--danger)}
+.invTabs{display:flex;gap:6px;overflow-x:auto;padding:4px;margin-bottom:14px;background:var(--surface-2,var(--card));border:1px solid var(--line);border-radius:var(--r-full);scrollbar-width:none}
+.invTabs::-webkit-scrollbar{display:none}
+.invTabs button{display:inline-flex;align-items:center;gap:8px;flex:none;padding:9px 16px;border:0;border-radius:var(--r-full);background:transparent;color:var(--ink,inherit);font:inherit;font-weight:650;font-size:var(--fs-2,14px);cursor:pointer;white-space:nowrap;transition:background .18s ease,color .18s ease}
+.invTabs button:hover{background:var(--surface-3)}
+.invTabs button[aria-selected="true"]{background:var(--card);box-shadow:0 1px 3px #0003;color:var(--g,inherit)}
+.invTabs button:focus-visible{outline:2px solid var(--g,#2d8f5f);outline-offset:2px}
+.invTabIcon{display:inline-flex;align-items:center;line-height:1}
+.invTabIcon svg{width:16px;height:16px}
+.invTabBadge{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;padding:0 6px;border-radius:var(--r-full);background:var(--r,#c0392b);color:#fff;font-size:11px;font-weight:800;line-height:1}
+.invPanel{display:none}
+.invPanel.active{display:block}
+@media (max-width:640px){.invTabs button{padding:9px 12px}.invTabs button .invTabLabel{font-size:13px}}
 .tag{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:var(--r-full);font-size:var(--fs-1);background:var(--surface-3);font-weight:650;white-space:nowrap}
 .tag.good{background:#e7f6ec;color:#12633b}
 .tag.good::before{content:"✓"}
@@ -565,7 +577,7 @@ tr.bad>td{background:#fff7f6}
 <div class="section"><div class="card"><h3>Recent Business Activity</h3><div class="vb-info">Latest recorded business events. “View” shows the source transaction and its accounting effect; loan records also show liquidation/allocation and summary.</div><div id="recent" style="margin-top:12px"></div></div></div>
 </section>
 <section id="cash" class="page"><div class="pageHead"><div><h2>Cash Transactions</h2><div class="pageSub">Record manual cash movements — expenses, owner capital, loans and drawings — outside the linked sales, purchase and collection modules.</div></div></div><div class="notice">Use Sales, Purchases and Collections modules for linked business events. Manual cash is for legitimate items such as expenses, owner capital, loans, drawings and other cash movements.</div><div class="card"><div class="row"><div class="field"><label>Date</label><input id="cashDate" type="date"></div><div class="field"><label>Direction</label><select id="cashDir"><option value="in">Cash In</option><option value="out">Cash Out</option></select></div><div class="field"><label>Business Cash Type</label><div class="cashSelect" id="cashCatWrap"><input id="cashCat" type="hidden"><button type="button" class="cashSelectBtn" id="cashCatBtn" aria-haspopup="listbox" aria-expanded="false">Select category <span>▾</span></button><div class="cashSelectMenu" id="cashCatMenu" role="listbox"></div></div></div><div class="field"><label>Amount</label><input id="cashAmt" type="number" min="0" step=".01"></div><div class="field"><label>Description / Reference</label><input id="cashDesc" maxlength="500"></div><button id="cashSaveBtn" class="primary" onclick="saveCash()">Save</button></div></div><div class="card" style="margin-top:12px"><div id="cashTable"></div></div></section>
-<section id="inventory" class="page"><div class="pageHead"><div><h2>Inventory</h2><div class="pageSub">Products, lot-level stock and expiry, stocktake snapshots and spoilage, valued at weighted-average cost.</div></div></div><div class="actions toolbar"><button class="primary" onclick="openProduct()">+ Add Product</button><button class="secondary" onclick="downloadPath('/products/template')">⬇ Product Template</button><label class="secondary">⬆ Import Products <input id="importFile" type="file" accept=".xlsx,.xls,.csv" hidden></label><button class="secondary" onclick="downloadPath('/inventory/lots/template')">⬇ Stock-In / Lot Template</button><label class="secondary">⬆ Import Stock-In Lots <input id="lotImportFile" type="file" accept=".xlsx,.xls,.csv" hidden></label><button class="secondary" onclick="toggleArchived()" id="archToggleBtn">Show Archived</button><button class="secondary" onclick="openReport('inventory')">Detailed Inventory Valuation</button></div><div class="notice">Inventory uses historical transaction costs and weighted-average costing for new purchases and sales. Inventory value is traceable to the movement ledger.<div class="dashboardExplain"><b>Expiry is tracked per lot / batch,</b> never on the product master. Sales consume stock <b>FEFO (First Expire, First Out)</b>, and expired lots are blocked from sales until they are processed as spoilage. Click a product row’s <b>Lots</b> button to see every batch, its expiry date and its status.</div></div><div class="card"><div class="field" style="max-width:420px;margin-bottom:10px"><label for="invSearch">Search inventory</label><input id="invSearch" type="search" autocomplete="off" placeholder="Search products..." aria-label="Search products" oninput="onInventorySearch(this.value)"><div id="invSearchCount" class="muted" style="margin-top:4px"></div></div><div id="productTable"></div></div><div class="card" style="margin-top:12px"><h3>System Stocktake Snapshot</h3><div class="row"><div class="field"><label>As of</label><input id="stockDate" type="date"></div><div class="field"><label>Notes</label><input id="stockNotes"></div><button class="primary" onclick="recordStocktake()">Save Stocktake Snapshot</button></div><div id="stockResult" class="muted" style="margin-top:8px"></div><div class="vb-info" style="margin-top:8px">Ang snapshot mo-record sa system quantity. I-butang ang <b>actual nga na-count</b> sa ubos aron ma-reconcile ang physical stock ug automatic nga mag-post ang variance adjustment.</div><div class="field" style="max-width:420px;margin-top:10px"><label for="snapSearch">Search snapshot</label><input id="snapSearch" type="search" autocomplete="off" placeholder="Search products..." aria-label="Search snapshot products" oninput="onSnapshotSearch(this.value)"></div><div id="stocktakeCount" style="margin-top:10px"></div></div><div class="card" style="margin-top:12px"><h3>Automatic Spoilage / Wastage Queue <span id="spoilQueueBadge" class="tag"></span></h3><div class="vb-info">Ang system automatic nga mo-detect og expired nga lot ug mo-text sa owner. <b>Walay ma-minus sa stock ug walay accounting entry</b> hangtod nga i-approve nimo diri.</div><div class="actions toolbar" style="margin-top:8px"><button class="secondary" onclick="scanSpoilageQueue()" id="spoilQueueScanBtn">Scan Expired Stock Now</button><div class="field" style="max-width:320px"><label for="spoilQueueSearch">Search queue</label><input id="spoilQueueSearch" type="search" autocomplete="off" placeholder="Search pending items..." aria-label="Search spoilage queue" oninput="onSpoilageQueueSearch(this.value)"></div></div><div id="spoilageQueueTable" style="margin-top:10px"></div></div><div class="card" style="margin-top:12px"><h3>Spoilage / Wastage</h3><div class="vb-info">Kung madaot, malata, malaya, o dili na baligya ang prutas/gulay, i-record diri. Ang system mo-minus sa inventory gamit ang weighted-average cost ug mo-record og separate Spoilage / Wastage Expense.</div><div class="row" style="margin-top:10px"><div class="field"><label>Date</label><input id="spoilageDate" type="date"></div><div class="field"><label>Product</label><select id="spoilageProduct"></select></div><div class="field"><label>Lot / Batch</label><select id="spoilageLot"><option value="">Automatic (expired first, then FEFO)</option></select></div><div class="field"><label>Spoiled Quantity</label><input id="spoilageQty" type="number" min="0.001" step=".001"></div><div class="field"><label>Reason</label><input id="spoilageReason" maxlength="200" placeholder="Rotten, overripe, damaged, etc."></div><button id="spoilageBtn" class="danger" onclick="recordSpoilage()">Record Spoilage</button><button id="spoilExpiredBtn" class="secondary" onclick="processExpired()">Process All Expired Lots</button></div><div id="spoilageLotHint" class="vb-info" style="margin-top:8px"></div><div class="vb-info">Ang spoilage dili i-count as sales ug dili pud siya i-add sa cash outflow. Inventory loss siya nga na-convert ngadto sa Spoilage / Wastage Expense.</div></div></section>
+<section id="inventory" class="page"><div class="pageHead"><div><h2>Inventory</h2><div class="pageSub">Products, lot-level stock and expiry, the expired-stock approval queue, manual spoilage and stocktake snapshots — valued at weighted-average cost.</div></div></div><div class="invTabs" id="invTabs" role="tablist" aria-label="Inventory sections"></div><div class="invPanel active" id="invPanel-stock" role="tabpanel" aria-labelledby="invTab-stock" tabindex="0"><div class="actions toolbar"><button class="primary" onclick="openProduct()">+ Add Product</button><button class="secondary" onclick="downloadPath('/products/template')">⬇ Product Template</button><label class="secondary">⬆ Import Products <input id="importFile" type="file" accept=".xlsx,.xls,.csv" hidden></label><button class="secondary" onclick="downloadPath('/inventory/lots/template')">⬇ Stock-In / Lot Template</button><label class="secondary">⬆ Import Stock-In Lots <input id="lotImportFile" type="file" accept=".xlsx,.xls,.csv" hidden></label><button class="secondary" onclick="toggleArchived()" id="archToggleBtn">Show Archived</button><button class="secondary" onclick="openReport('inventory')">Detailed Inventory Valuation</button></div><div class="notice">Inventory uses historical transaction costs and weighted-average costing for new purchases and sales. Inventory value is traceable to the movement ledger.<div class="dashboardExplain"><b>Expiry is tracked per lot / batch,</b> never on the product master. Sales consume stock <b>FEFO (First Expire, First Out)</b>, and expired lots are blocked from sales until they are approved in the <b>Queue</b> tab. Click a product row’s <b>Lots</b> button to see every batch, its expiry date and its status.</div></div><div class="card"><div class="field" style="max-width:420px;margin-bottom:10px"><label for="invSearch">Search inventory</label><input id="invSearch" type="search" autocomplete="off" placeholder="Search products..." aria-label="Search products" oninput="onInventorySearch(this.value)"><div id="invSearchCount" class="muted" style="margin-top:4px"></div></div><div id="productTable"></div></div></div><div class="invPanel" id="invPanel-lots" role="tabpanel" aria-labelledby="invTab-lots" tabindex="0"><div class="notice">Every open lot / batch with its received date, expiry date, remaining quantity, remaining value and expiry status. This view is for <b>traceability only</b> — expired lots are written off exclusively through the <b>Queue</b> tab after owner approval.</div><div class="card"><div class="actions toolbar"><div class="field" style="max-width:420px"><label for="lotSearch">Search lots / batches</label><input id="lotSearch" type="search" autocomplete="off" placeholder="Search product or lot code..." aria-label="Search lots and batches" oninput="onLotSearch(this.value)"></div><button class="secondary" onclick="downloadPath('/inventory/lots/template')">⬇ Stock-In / Lot Template</button></div><div id="lotsTable" style="margin-top:10px"></div></div></div><div class="invPanel" id="invPanel-queue" role="tabpanel" aria-labelledby="invTab-queue" tabindex="0"><div class="card"><h3><span class="invTabIcon" style="display:inline-flex;vertical-align:-3px;margin-right:6px"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M18 9a6 6 0 1 0-12 0c0 5-2 6-2 6h16s-2-1-2-6"/><path d="M10.3 20a2 2 0 0 0 3.4 0"/></svg></span>Automatic Spoilage / Wastage Queue</h3><div class="vb-info">Ang system automatic nga mo-detect og expired nga lot ug mo-text sa owner. <b>Walay ma-minus sa stock ug walay accounting entry</b> hangtod nga i-approve nimo diri.</div><div class="notice">This is the <b>only</b> place expired stock is written off. Approving an item reduces inventory at weighted-average cost and posts <b>Dr Spoilage / Wastage Expense, Cr Inventory</b>. Dismissing an item closes the request without touching stock or the books.</div><div id="spoilQueueSummary" class="muted" style="margin-top:8px" role="status" aria-live="polite"></div><div class="actions toolbar" style="margin-top:8px"><button class="secondary" onclick="scanSpoilageQueue()" id="spoilQueueScanBtn">Scan Expired Stock Now</button><div class="field" style="max-width:320px"><label for="spoilQueueSearch">Search queue</label><input id="spoilQueueSearch" type="search" autocomplete="off" placeholder="Search pending items..." aria-label="Search spoilage queue" oninput="onSpoilageQueueSearch(this.value)"></div></div><div id="spoilageQueueTable" style="margin-top:10px"></div></div></div><div class="invPanel" id="invPanel-spoilage" role="tabpanel" aria-labelledby="invTab-spoilage" tabindex="0"><div class="card"><h3>Manual Spoilage / Wastage</h3><div class="notice">Use Manual Spoilage / Wastage for <b>physical losses</b> such as damage, rot, wilt, overripe stock, dropped, contaminated or otherwise unsellable inventory. <b>Expired stock is handled through the Automatic Spoilage / Wastage Queue.</b><div class="actions" style="margin-top:8px"><button class="secondary" onclick="goPage('inventory','queue')">Review Queue</button></div></div><div class="vb-info">Kung madaot, malata, malaya, o dili na baligya ang prutas/gulay, i-record diri. Ang system mo-minus sa inventory gamit ang weighted-average cost ug mo-record og separate Spoilage / Wastage Expense. Ang <b>expired</b> nga lot, didto sa Queue i-approve.</div><div class="row" style="margin-top:10px"><div class="field"><label>Date</label><input id="spoilageDate" type="date"></div><div class="field"><label>Product</label><select id="spoilageProduct"></select></div><div class="field"><label>Lot / Batch</label><select id="spoilageLot"><option value="">Automatic (expired first, then FEFO)</option></select></div><div class="field"><label>Spoiled Quantity</label><input id="spoilageQty" type="number" min="0.001" step=".001"></div><div class="field"><label>Reason</label><input id="spoilageReason" maxlength="200" placeholder="Rotten, overripe, damaged, etc."></div><button id="spoilageBtn" class="danger" onclick="recordSpoilage()">Record Spoilage</button></div><div id="spoilageLotHint" class="vb-info" style="margin-top:8px"></div><div class="vb-info">Ang spoilage dili i-count as sales ug dili pud siya i-add sa cash outflow. Inventory loss siya nga na-convert ngadto sa Spoilage / Wastage Expense.</div></div></div><div class="invPanel" id="invPanel-stocktake" role="tabpanel" aria-labelledby="invTab-stocktake" tabindex="0"><div class="card"><h3>System Stocktake Snapshot</h3><div class="row"><div class="field"><label>As of</label><input id="stockDate" type="date"></div><div class="field"><label>Notes</label><input id="stockNotes"></div><button class="primary" onclick="recordStocktake()">Save Stocktake Snapshot</button></div><div id="stockResult" class="muted" style="margin-top:8px"></div><div class="vb-info" style="margin-top:8px">Ang snapshot mo-record sa system quantity. I-butang ang <b>actual nga na-count</b> sa ubos aron ma-reconcile ang physical stock ug automatic nga mag-post ang variance adjustment.</div><div class="field" style="max-width:420px;margin-top:10px"><label for="snapSearch">Search snapshot</label><input id="snapSearch" type="search" autocomplete="off" placeholder="Search products..." aria-label="Search snapshot products" oninput="onSnapshotSearch(this.value)"></div><div id="stocktakeCount" style="margin-top:10px"></div></div></div></section>
 <section id="sales" class="page"><div class="pageHead"><div><h2>Sales</h2><div class="pageSub">Record cash and credit sales. Stock is consumed first-expire-first-out and posted to the books automatically.</div></div></div><div class="card"><div class="row"><div class="field"><label>Date</label><input id="saleDate" type="date"></div><div class="field"><label>Customer</label><input id="saleCustomer"></div><div class="field"><label>Product</label><select id="saleProduct"></select></div><div class="field"><label>Quantity</label><input id="saleQty" type="number" min="0.001" step=".001"></div><div class="field"><label>Selling Price / Unit</label><input id="salePrice" type="number" min="0.01" step=".01"></div><div class="field"><label>Discount</label><input id="saleDiscount" type="number" min="0" step=".01" value="0"></div><div class="field"><label>Payment</label><select id="saleStatus"><option>Credit</option><option>Cash</option></select></div><button id="saleBtn" class="primary" onclick="saveSale()">Record Sale</button></div></div><div class="card" style="margin-top:12px"><div id="salesTable"></div></div></section>
 <section id="purchases" class="page"><div class="pageHead"><div><h2>Purchases</h2><div class="pageSub">Record supplier purchases with lot code and expiry so inventory costing and expiry tracking stay accurate.</div></div></div><div class="card"><div class="row"><div class="field"><label>Date</label><input id="purchaseDate" type="date"></div><div class="field"><label>Supplier</label><input id="purchaseSupplier"></div><div class="field"><label>Product</label><select id="purchaseProduct"></select></div><div class="field"><label>Quantity</label><input id="purchaseQty" type="number" min="0.001" step=".001"></div><div class="field"><label>Actual Unit Cost</label><input id="purchaseCost" type="number" min="0.01" step=".01"></div><div class="field"><label>Lot / Batch Code</label><input id="purchaseLot" maxlength="60"></div><div class="field"><label>Expiry Date</label><input id="purchaseExpiry" type="date"></div><div class="field"><label>Payment</label><select id="purchaseStatus"><option>Credit</option><option>Cash</option></select></div><button id="purchaseBtn" class="primary" onclick="savePurchase()">Record Purchase</button></div></div><div class="card" style="margin-top:12px"><div id="purchaseTable"></div></div></section>
 <section id="collections" class="page"><div class="pageHead"><div><h2>Customer Collections / Receivables</h2><div class="pageSub">Apply customer payments against credit sales. Collections reduce Accounts Receivable and never create new revenue.</div></div></div><div class="notice">A collection reduces Accounts Receivable; it does NOT create new revenue. Link a collection to an actual credit sale whenever possible.</div><div class="card"><div class="row"><div class="field"><label>Date</label><input id="collectionDate" type="date"></div><div class="field"><label>Customer</label><input id="collectionCustomer"></div><div class="field"><label>Credit Sale / Invoice</label><select id="collectionSale"></select></div><div class="field"><label>Amount</label><input id="collectionAmount" type="number" min="0.01" step=".01"></div><div class="field"><label>Reference</label><input id="collectionRef"></div><button class="primary" onclick="saveCollection()">Record Collection</button></div></div><div class="card" style="margin-top:12px"><div id="collectionTable"></div></div></section>
@@ -648,7 +660,7 @@ async function api(path,opt={}){const headers={'Accept':'application/json','X-VE
 function showToast(msg,bad=false){const t=$('toast');t.textContent=msg;t.style.background=bad?'#7d201b':'#173a29';t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3500)}
 function showAuth(){if(realtimeConnection){try{realtimeConnection.close()}catch{}realtimeConnection=null}document.querySelectorAll('#appHeader,#nav,#appMain,#sidebar,#sidebarOverlay,#mobileNav').forEach(x=>x.classList.add('hidden'));$('auth').classList.remove('hidden');refreshInstallUi()}
 function showAppShell(){document.querySelectorAll('#appHeader,#nav,#appMain,#sidebar,#mobileNav').forEach(x=>x.classList.remove('hidden'));$('auth').classList.add('hidden');$('sidebarOverlay').classList.remove('open');refreshInstallUi()}
-async function boot(){if(!token()){showAuth();return false}try{const st=await api('/settings');settings=st.settings||{};applyBranding(settings);writeCachedBranding(publicBrandSubset(settings));preloadCriticalBranding(settings);showAppShell();connectRealtime().catch(()=>{});load().catch(()=>{});return true}catch(e){if(!token())showAuth();else showToast(e.message,true);return false}}
+async function boot(){if(!token()){showAuth();return false}try{const st=await api('/settings');settings=st.settings||{};applyBranding(settings);writeCachedBranding(publicBrandSubset(settings));preloadCriticalBranding(settings);showAppShell();showInvTab(invTab,false);connectRealtime().catch(()=>{});load().catch(()=>{});refreshQueueCount().catch(()=>{});return true}catch(e){if(!token())showAuth();else showToast(e.message,true);return false}}
 function publicBrandSubset(s){const out={};for(const k of ['companyName','tagline','primaryColor','secondaryColor','backgroundColor','loadingLogo','browserLogo','desktopIcon','favicon'])if(s&&s[k]!==undefined)out[k]=s[k];out.brandingVersion=s?.brandingVersion||s?._brandingVersion||'';return out}
 // Fast start: paint the last known branding synchronously from cache so the
 // splash never waits on the network, then do exactly ONE settings request
@@ -685,11 +697,66 @@ function navBtn(id,cls=''){const n=navMeta(id);return `<button class="${cls}" da
 $('nav').innerHTML=NAV_GROUPS.map(([g,ids])=>`<div class="navGroup">${g}</div>`+ids.map(id=>navBtn(id,id==='dashboard'?'active':'')).join('')).join('');
 $('mobileNav').innerHTML=MOBILE_PRIMARY.map(id=>navBtn(id,id==='dashboard'?'active':'')).join('')+`<button data-page="__more" onclick="openMoreSheet()"><span class="navIcon">⋯</span><span class="navLabel">More</span></button>`;
 $('moreSheetGrid').innerHTML=navs.map(n=>navBtn(n[0])).join('');
-function goPage(id){showPage(id);closeSidebar();closeMoreSheet()}
+function goPage(id,tab){showPage(id);if(id==='inventory'&&tab)showInvTab(tab);closeSidebar();closeMoreSheet()}
 function openMoreSheet(){$('moreSheet').classList.add('open')}
 function closeMoreSheet(){$('moreSheet').classList.remove('open')}
 ['cashDate','saleDate','purchaseDate','collectionDate','stockDate','spoilageDate','pOpenDate','fromDate','toDate'].forEach(id=>$(id).value=today);$('fromDate').value=today.slice(0,8)+'01';
-function showPage(id,btn){document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));const page=$(id);if(!page)return;page.classList.add('active');document.querySelectorAll('#nav button,#mobileNav button,#moreSheetGrid button').forEach(x=>x.classList.toggle('active',x.dataset.page===id));if(!MOBILE_PRIMARY.includes(id))document.querySelector('#mobileNav button[data-page="__more"]')?.classList.add('active');window.scrollTo({top:0,behavior:'instant'});if(id==='reports')applyReportPeriod();if(id==='settings')renderSettings();if(id==='settings'){loadSmsSettings();loadSmsHistory()}if(id==='dashboard')loadAnalytics()}
+function showPage(id,btn){document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));const page=$(id);if(!page)return;page.classList.add('active');document.querySelectorAll('#nav button,#mobileNav button,#moreSheetGrid button').forEach(x=>x.classList.toggle('active',x.dataset.page===id));if(!MOBILE_PRIMARY.includes(id))document.querySelector('#mobileNav button[data-page="__more"]')?.classList.add('active');window.scrollTo({top:0,behavior:'instant'});if(id==='reports')applyReportPeriod();if(id==='settings')renderSettings();if(id==='settings'){loadSmsSettings();loadSmsHistory()}if(id==='dashboard')loadAnalytics();if(id==='inventory'){renderInvTabs();refreshQueueCount().catch(()=>{})}}
+
+/* ==========================================================================
+   INVENTORY INFORMATION ARCHITECTURE
+   One shared tab strip for the whole Inventory section: Stock, Lots / Batches,
+   Queue (with the pending-spoilage notification bell), Spoilage / Wastage and
+   Stocktake. Presentation only - no tab performs an inventory or accounting
+   mutation by itself.
+   ========================================================================== */
+const INV_TAB_ICONS={box:`<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M21 8 12 3 3 8v8l9 5 9-5Z"/><path d="M3 8l9 5 9-5"/><path d="M12 13v8"/></svg>`,doc:`<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 3h9l4 4v14H6Z"/><path d="M15 3v4h4"/><path d="M9 12h6M9 16h4"/></svg>`,bell:`<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M18 9a6 6 0 1 0-12 0c0 5-2 6-2 6h16s-2-1-2-6"/><path d="M10.3 20a2 2 0 0 0 3.4 0"/></svg>`,trash:`<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/><path d="M10 11v6M14 11v6"/></svg>`,chart:`<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>`};
+const INV_TABS=[['stock','Stock','box'],['lots','Lots / Batches','doc'],['queue','Queue','bell'],['spoilage','Spoilage / Wastage','trash'],['stocktake','Stocktake','chart']];
+let invTab=(()=>{try{const t=sessionStorage.getItem('vege_inv_tab');return INV_TABS.some(x=>x[0]===t)?t:'stock'}catch{return 'stock'}})();
+
+/* THE authoritative pending queue count. Fetched from
+   GET /api/inventory/spoilage-queue/count and nowhere else recomputed.
+   null = not known yet, so the badge simply stays hidden (never 0/NaN). */
+let pendingQueueCount=null;
+
+function queueBadgeText(n){return n>99?'99+':String(n)}
+function renderInvTabs(){
+  const el=$('invTabs'); if(!el)return;
+  const n=Number.isFinite(pendingQueueCount)?pendingQueueCount:0;
+  el.innerHTML=INV_TABS.map(([id,label,icon])=>{
+    const active=invTab===id;
+    const isQueue=id==='queue';
+    const showBadge=isQueue&&n>0;
+    // Accessible name never relies on the badge colour alone.
+    const aria=isQueue?(n>0?`Queue, ${n} pending item${n===1?'':'s'}`:'Queue, no pending items'):label;
+    return `<button type="button" id="invTab-${id}" role="tab" aria-selected="${active}" aria-controls="invPanel-${id}" tabindex="${active?0:-1}" aria-label="${aria}" title="${aria}" onclick="showInvTab('${id}')" onkeydown="onInvTabKey(event,'${id}')">`
+      +`<span class="invTabIcon" aria-hidden="true">${INV_TAB_ICONS[icon]||''}</span><span class="invTabLabel">${label}</span>`
+      +(showBadge?`<span class="invTabBadge" aria-hidden="true">${queueBadgeText(n)}</span>`:'')+`</button>`;
+  }).join('');
+}
+function showInvTab(id,focus=true){
+  if(!INV_TABS.some(x=>x[0]===id))id='stock';
+  invTab=id; try{sessionStorage.setItem('vege_inv_tab',id)}catch{}
+  document.querySelectorAll('#inventory .invPanel').forEach(p=>p.classList.toggle('active',p.id==='invPanel-'+id));
+  renderInvTabs();
+  if(id==='lots')renderLots();
+  if(id==='queue')loadSpoilageQueue().catch(()=>{});
+  if(focus)$('invTab-'+id)?.focus({preventScroll:true});
+}
+function onInvTabKey(e,id){
+  const keys={ArrowRight:1,ArrowLeft:-1,ArrowDown:1,ArrowUp:-1};
+  if(keys[e.key]===undefined&&e.key!=='Home'&&e.key!=='End')return;
+  e.preventDefault();
+  const ids=INV_TABS.map(x=>x[0]); const i=ids.indexOf(id);
+  const next=e.key==='Home'?0:e.key==='End'?ids.length-1:(i+keys[e.key]+ids.length)%ids.length;
+  showInvTab(ids[next]);
+}
+/** Single fetch point for the badge number. */
+async function refreshQueueCount(){
+  try{const r=await api('/inventory/spoilage-queue/count');pendingQueueCount=num(r.pending);}
+  catch{/* leave the previous known value; never invent a notification */}
+  renderInvTabs();
+}
 
 const SMS_CATS=[["inventory", "Inventory & expiry"], ["financial", "Cash & financial"], ["receivable", "Customer receivables"], ["payable", "Supplier payables"], ["loan", "Loans"], ["system", "System & backups"], ["largeTransactions", "Large transactions"], ["dailySummary", "Daily business summary"], ["weeklySummary", "Weekly business summary"]];
 const SMS_THRESH=[["largeSale", "Large sale amount"], ["largePurchase", "Large purchase amount"], ["largeCollection", "Large collection amount"], ["largeCashIn", "Large cash in"], ["largeCashOut", "Large cash out"], ["lowCash", "Low cash floor"], ["inventoryLossValue", "Spoilage loss value"], ["stocktakeVarianceValue", "Stocktake variance value"], ["receivableOverdueDays", "Receivable overdue (days)"], ["receivableOverdueAmount", "Receivable overdue amount"], ["payableOverdueDays", "Payable overdue (days)"], ["payableOverdueAmount", "Payable overdue amount"], ["loanOutstanding", "Loan outstanding above"]];
@@ -782,7 +849,7 @@ const tx=[...cash.map(x=>({date:x.date,id:x.id,type:x.direction==='in'?'Cash In'
 }
 const EXPIRY_TAG={expired:'bad',expiring_soon:'warn',active:'good',none:''};
 function expiryBadge(p){
-  if(p.expired_qty>0) return `<span class="tag bad" title="Expired stock must be processed as spoilage">Expired ${num(p.expired_qty).toFixed(3)}</span>`;
+  if(p.expired_qty>0) return `<span class="tag bad" title="Expired stock awaits owner approval in Inventory → Queue">Expired ${num(p.expired_qty).toFixed(3)}</span>`;
   if(p.expiring_soon_qty>0) return `<span class="tag warn" title="Within the product's expiry alert window">Expiring ${num(p.expiring_soon_qty).toFixed(3)}</span>`;
   if(p.next_expiry_date) return `<span class="tag good">OK</span>`;
   return '<span class="muted">—</span>';
@@ -799,11 +866,11 @@ function renderAlerts(){
   const lotRows=rows=>rows.map(x=>`<div class="treeRow subrow"><span>${esc(x.product)} • lot ${esc(x.lot_code||'#'+x.lot_id)} • expiry ${esc(x.expiry_date||'—')} • ${num(x.quantity).toFixed(3)} ${esc(x.unit)}</span><strong>${money(x.value)}</strong></div>`).join('');
   const block=(title,count,body,extra='')=>`<div class="reportSubCard"><div class="reportSubHead"><div><div class="muted">${title}</div><div class="kpi" style="font-size:21px">${count}</div></div></div>${body||'<div class="empty">Nothing to act on.</div>'}${extra}</div>`;
   $('alertPanel').innerHTML=`<div class="card ${c.expired?'bad':''}"><h3>Low Stock & Spoilage Alert</h3>
-    <div class="vb-info">Low stock uses each product's Reorder Level. Expiring soon uses each product's Expiry Alert Days (default ${num(a.default_alert_days||7)}). Expired lots are already blocked from sales and must be written off as spoilage.</div>
+    <div class="vb-info">Low stock uses each product's Reorder Level. Expiring soon uses each product's Expiry Alert Days (default ${num(a.default_alert_days||7)}). Expired lots are already blocked from sales and are written off only after owner approval in Inventory → Queue.</div>
     <div class="grid" style="margin-top:10px">
       ${block('Low stock products',num(c.low_stock),lowRows)}
       ${block(`Lots expiring soon • ${money(a.totals?.expiring_soon_value)}`,num(c.expiring_soon),lotRows(a.expiring_soon||[]))}
-      ${block(`Expired lots • ${money(a.totals?.expired_value)}`,num(c.expired),lotRows(a.expired||[]),c.expired?`<div class="actions" style="margin-top:8px"><button class="danger" onclick="processExpired()">Process ${num(c.expired)} expired lot(s) as spoilage</button></div>`:'')}
+      ${block(`Expired lots • ${money(a.totals?.expired_value)}`,num(c.expired),lotRows(a.expired||[]),c.expired?`<div class="actions" style="margin-top:8px"><button class="secondary" onclick="goPage('inventory','queue')">Review Spoilage Queue</button></div>`:'')}
     </div></div>`;
 }
 function renderDashboard(){
@@ -941,7 +1008,7 @@ function productRow(p){
 }
 function lotDrawer(p){
   const rows=(p.lots||[]);
-  const body=rows.length?rows.map(l=>`<div class="treeRow subrow"><span><b>${esc(l.lot_code||'Lot #'+l.id)}</b> • received ${esc(l.received_date)} • expiry <input class="rowInput" style="max-width:150px" type="date" id="lot_exp_${l.id}" value="${esc(l.expiry_date||'')}"> • ${num(l.remaining_qty).toFixed(3)} ${esc(p.unit||'unit')} left • ${money(l.remaining_value)} <span class="tag ${EXPIRY_TAG[l.expiry_status]||''}">${esc(l.expiry_status_label)}</span></span><span class="rowActs"><button class="iconBtn save" title="Save lot" onclick="saveLot(${l.id})">${ICON_SAVE}</button>${l.needs_spoilage_action?`<button class="iconBtn del" title="Write off this expired lot" onclick="spoilLot(${p.id},${l.id},${l.remaining_qty})">Spoil</button>`:''}</span></div>`).join(''):'<div class="empty">No open lots. Received stock without lot tracking is shown as untracked quantity.</div>';
+  const body=rows.length?rows.map(l=>`<div class="treeRow subrow"><span><b>${esc(l.lot_code||'Lot #'+l.id)}</b> • received ${esc(l.received_date)} • expiry <input class="rowInput" style="max-width:150px" type="date" id="lot_exp_${l.id}" value="${esc(l.expiry_date||'')}"> • ${num(l.remaining_qty).toFixed(3)} ${esc(p.unit||'unit')} left • ${money(l.remaining_value)} <span class="tag ${EXPIRY_TAG[l.expiry_status]||''}">${esc(l.expiry_status_label)}</span></span><span class="rowActs"><button class="iconBtn save" title="Save lot" onclick="saveLot(${l.id})">${ICON_SAVE}</button>${l.needs_spoilage_action?`<button class="secondary small" title="Expired — pending queue review" onclick="goPage('inventory','queue')">Review in Queue</button>`:''}</span></div>`).join(''):'<div class="empty">No open lots. Received stock without lot tracking is shown as untracked quantity.</div>';
   const untracked=num(p.untracked_qty)>0?`<div class="muted" style="margin-top:6px">Untracked legacy stock: ${num(p.untracked_qty).toFixed(3)} ${esc(p.unit||'unit')} (recorded before lot tracking; always sellable).</div>`:'';
   return `<tr><td colspan="14"><div class="reportSubDetail"><b>Lots / batches — ${esc(p.name)}</b>${body}${untracked}</div></td></tr>`;
 }
@@ -972,6 +1039,7 @@ function onSnapshotSearch(value){
   renderStocktakeCount();
 }
 function renderProducts(){
+  renderLots();
   const headers=['Product','SKU','Category','Source','Unit','Current Avg Cost','Price','Stock','Reorder','Shelf Life (d)','Alert (d)','Next Expiry','Expiry Status','Actions'];
   const visible=products.filter(p=>productMatchesQuery(p,inventoryQuery));
   const countEl=$('invSearchCount');
@@ -983,31 +1051,46 @@ function renderProducts(){
   const emptyText=inventoryQuery?'No products found.':'No products';
   $('productTable').innerHTML=`<div class="tablewrap"><table><thead><tr>${headers.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${body||`<tr><td colspan="${headers.length}" class="empty">${emptyText}</td></tr>`}</tbody></table></div>`;
 }
+
+/* Lots / Batches tab: read-only traceability over the SAME products dataset. */
+let lotQuery='';
+function onLotSearch(v){lotQuery=searchNeedle(v);renderLots()}
+function renderLots(){
+  const el=$('lotsTable'); if(!el)return;
+  const rows=[];
+  (products||[]).forEach(p=>(p.lots||[]).forEach(l=>rows.push({p,l})));
+  const visible=rows.filter(({p,l})=>!lotQuery||[p.name,p.sku,l.lot_code,l.expiry_date,l.received_date].some(x=>String(x==null?'':x).toLowerCase().includes(lotQuery)));
+  const body=visible.map(({p,l})=>{
+    const status=`<span class="tag ${EXPIRY_TAG[l.expiry_status]||''}">${esc(l.expiry_status_label||'')}</span>`;
+    const action=l.needs_spoilage_action
+      ? `<button class="secondary small" title="Expired \u2014 pending owner approval in the Queue" onclick="goPage('inventory','queue')">Review in Queue</button>`
+      : '<span class="muted">\u2014</span>';
+    return `<tr class="${l.needs_spoilage_action?'bad':''}"><td>${esc(p.name)}</td><td>${esc(l.lot_code||'Lot #'+l.id)}</td><td>${esc(l.received_date||'')}</td><td>${esc(l.expiry_date||'\u2014')}</td><td>${num(l.remaining_qty).toFixed(3)} ${esc(p.unit||'unit')}</td><td>${money(l.remaining_value)}</td><td>${status}</td><td>${action}</td></tr>`;
+  }).join('');
+  const headers=['Product','Lot / Batch','Received','Expiry','Remaining','Value','Status','Expired stock'];
+  el.innerHTML=`<div class="tablewrap"><table><thead><tr>${headers.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${body||`<tr><td colspan="${headers.length}" class="empty">${lotQuery?'No lots found.':'No open lots yet.'}</td></tr>`}</tbody></table></div>`;
+}
 function toggleLots(id){expandedLots.has(id)?expandedLots.delete(id):expandedLots.add(id);renderProducts()}
 function toggleArchived(){showArchived=!showArchived;$('archToggleBtn').textContent=showArchived?'Hide Archived':'Show Archived';load()}
 async function saveLot(lotId){
   try{await api('/inventory/lots/'+lotId,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({expiry_date:$('lot_exp_'+lotId).value})});showToast('Lot expiry updated.');await load();await applyReportPeriod();}
   catch(e){showToast(e.message,true)}
 }
-async function spoilLot(productId,lotId,qty){
-  if(!confirm(`Write off ${num(qty).toFixed(3)} unit(s) from this expired lot as spoilage?`))return;
-  try{const r=await api('/inventory/spoilage',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({date:$('spoilageDate').value||new Date().toISOString().slice(0,10),product_id:productId,lot_id:lotId,quantity:qty,reason:'Expired lot write-off'})});showToast(`Spoilage recorded. Inventory cost removed: ${money(r.total_cost)}`);await load();await applyReportPeriod();}
-  catch(e){showToast(e.message,true)}
-}
 let spoilageQueue=[],spoilageQueueQuery='';
 function onSpoilageQueueSearch(v){spoilageQueueQuery=String(v||'').trim().toLowerCase();renderSpoilageQueue()}
 async function loadSpoilageQueue(){
-  try{const r=await api('/inventory/spoilage-queue?status=PENDING');spoilageQueue=r.items||[];renderSpoilageQueue()}
+  try{const r=await api('/inventory/spoilage-queue?status=PENDING');spoilageQueue=r.items||[];await refreshQueueCount();renderSpoilageQueue()}
   catch(e){/* queue is informational only */}
 }
 function renderSpoilageQueue(){
   const el=$('spoilageQueueTable'); if(!el)return;
   const q=spoilageQueueQuery;
   const rows=spoilageQueue.filter(i=>!q||[i.product_name,i.lot_code,i.expiry_date,i.unit,String(i.id)].some(x=>String(x||'').toLowerCase().includes(q)));
-  const badge=$('spoilQueueBadge');
-  if(badge){badge.className='tag '+(spoilageQueue.length?'bad':'good');badge.textContent=spoilageQueue.length?`${spoilageQueue.length} pending`:'none pending'}
+  const n=Number.isFinite(pendingQueueCount)?pendingQueueCount:spoilageQueue.length;
+  const sum=$('spoilQueueSummary');
+  if(sum)sum.textContent=n>0?`${n} pending item${n===1?'':'s'} require review.`:'No pending spoilage items. All expired-stock items have been reviewed.';
   const body=rows.map(i=>`<tr><td>${esc(i.product_name||'')}</td><td>${esc(i.lot_code||'#'+i.lot_id)}</td><td>${esc(i.expiry_date||'')}</td><td>${num(i.quantity).toFixed(3)} ${esc(i.unit||'unit')}</td><td>${money(i.estimated_cost)}</td><td>${esc(i.notification_status||'')}</td><td><button class="danger small" onclick="approveSpoilageQueue(${i.id})">Approve &amp; Record</button> <button class="secondary small" onclick="dismissSpoilageQueue(${i.id})">Dismiss</button></td></tr>`).join('');
-  const empty=q?'No queued items found.':'No expired stock is waiting for approval.';
+  const empty=q?'No queued items found.':'No pending spoilage items. All expired-stock items have been reviewed.';
   el.innerHTML=`<div class="tablewrap"><table><thead><tr><th>Product</th><th>Lot</th><th>Expired</th><th>Quantity</th><th>Estimated Cost</th><th>SMS</th><th>Action</th></tr></thead><tbody>${body||`<tr><td colspan="7" class="empty">${empty}</td></tr>`}</tbody></table></div>`;
 }
 async function scanSpoilageQueue(){
@@ -1025,14 +1108,6 @@ async function dismissSpoilageQueue(id){
   if(!confirm('Dismiss this request? No stock or accounting entry will be made.'))return;
   try{const r=await api(`/inventory/spoilage-queue/${id}/dismiss`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({})});showToast(r.message);await loadSpoilageQueue();}
   catch(e){showToast(e.message,true)}
-}
-async function processExpired(){
-  const count=num(alerts?.counts?.expired);
-  if(!count){showToast('No expired lots with remaining stock.');return}
-  if(!confirm(`Process ${count} expired lot(s) as spoilage? Inventory will be reduced and a Spoilage / Wastage Expense recorded.`))return;
-  const btn=$('spoilExpiredBtn'); if(btn)btn.disabled=true;
-  try{const r=await api('/inventory/spoilage/expired',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({date:$('spoilageDate').value||undefined})});showToast(r.message);await load();await applyReportPeriod();}
-  catch(e){showToast(e.message,true)}finally{if(btn)btn.disabled=false}
 }
 function startProductRow(id){editingProductId=id;renderProducts();setTimeout(()=>$('ed_name_'+id)?.focus(),0)}
 function cancelProductRow(){editingProductId=null;renderProducts()}
