@@ -192,6 +192,9 @@ label.secondary{cursor:pointer}
 .notice{padding:var(--s3) var(--s4);background:var(--tint);border-left:3px solid var(--g);border-radius:var(--r-sm);margin:var(--s3) 0;font-size:var(--fs-2);line-height:1.5}
 .notice.warn{background:#fff8e6;border-left-color:#c48700}
 .notice.bad{background:#fdeeec;border-left-color:var(--danger)}
+.chkRow{display:flex;align-items:center;gap:10px;line-height:1.3;cursor:pointer}
+.chkRow input[type=checkbox]{width:18px;height:18px;flex:0 0 18px;margin:0;accent-color:var(--g)}
+.chkRow span{flex:1 1 auto}
 .invTabs{display:flex;gap:6px;overflow-x:auto;padding:4px;margin-bottom:14px;background:var(--surface-2,var(--card));border:1px solid var(--line);border-radius:var(--r-full);scrollbar-width:none}
 .invTabs::-webkit-scrollbar{display:none}
 .invTabs button{display:inline-flex;align-items:center;gap:8px;flex:none;padding:9px 16px;border:0;border-radius:var(--r-full);background:transparent;color:var(--ink,inherit);font:inherit;font-weight:650;font-size:var(--fs-2,14px);cursor:pointer;white-space:nowrap;transition:background .18s ease,color .18s ease}
@@ -606,7 +609,7 @@ tr.bad>td{background:#fff7f6}
 <section id="purchases" class="page"><div class="pageHead"><div><h2>Purchases</h2><div class="pageSub">Record supplier purchases with lot code and expiry so inventory costing and expiry tracking stay accurate.</div></div></div><div class="card"><div class="row"><div class="field"><label>Date</label><input id="purchaseDate" type="date"></div><div class="field"><label>Supplier</label><input id="purchaseSupplier"></div><div class="field"><label>Product</label><select id="purchaseProduct"></select></div><div class="field"><label>Quantity</label><input id="purchaseQty" type="number" min="0.001" step=".001"></div><div class="field"><label>Actual Unit Cost</label><input id="purchaseCost" type="number" min="0.01" step=".01"></div><div class="field"><label>Lot / Batch Code</label><input id="purchaseLot" maxlength="60"></div><div class="field"><label>Expiry Date</label><input id="purchaseExpiry" type="date"></div><div class="field"><label>Payment</label><select id="purchaseStatus"><option>Credit</option><option>Cash</option></select></div><button id="purchaseAddBtn" class="primary" onclick="addPurchaseToCart()">Add to Cart</button></div></div>
 <div class="card posCart" id="purchaseCartCard" style="margin-top:12px"><div class="posCartHead"><h3 style="margin:0">Current Purchase Cart</h3><button class="secondary" id="purchaseClearBtn" onclick="clearPurchaseCart()">Clear Cart</button></div><div id="purchaseCartBody"></div><div class="posCartFoot"><div class="posTotals" id="purchaseCartTotals"></div><button id="purchaseBtn" class="primary posCheckout" onclick="savePurchase()" disabled>Record Purchase</button></div></div>
 <div class="card" style="margin-top:12px"><div id="purchaseTable"></div></div></section>
-<section id="collections" class="page"><div class="pageHead"><div><h2>Customer Collections / Receivables</h2><div class="pageSub">Apply customer payments against credit sales. Collections reduce Accounts Receivable and never create new revenue.</div></div></div><div class="notice">A collection reduces Accounts Receivable; it does NOT create new revenue. Link a collection to an actual credit sale whenever possible.</div><div class="card"><div class="row"><div class="field"><label>Date</label><input id="collectionDate" type="date"></div><div class="field"><label>Customer</label><input id="collectionCustomer"></div><div class="field"><label>Credit Sale / Invoice</label><select id="collectionSale"></select></div><div class="field"><label>Amount</label><input id="collectionAmount" type="number" min="0.01" step=".01"></div><div class="field"><label>Reference</label><input id="collectionRef"></div><button class="primary" onclick="saveCollection()">Record Collection</button></div></div><div class="card" style="margin-top:12px"><div id="collectionTable"></div></div></section>
+<section id="collections" class="page"><div class="pageHead"><div><h2>Customer Collections / Receivables</h2><div class="pageSub">Apply customer payments against credit sales. Collections reduce Accounts Receivable and never create new revenue.</div></div></div><div class="notice">A collection reduces Accounts Receivable; it does NOT create new revenue. Link a collection to an actual credit sale whenever possible.</div><div class="card"><div class="row"><div class="field"><label>Date</label><input id="collectionDate" type="date"></div><div class="field"><label>Customer with balance</label><select id="collectionCustomer" onchange="onCollectionCustomer()"></select></div><div class="field"><label>Reference (optional)</label><input id="collectionRef" placeholder="OR / receipt no."></div></div><div id="collectionPicker" style="margin-top:12px"></div><div class="row" id="collectionUnalloc" style="margin-top:10px;align-items:flex-end"><label class="chkRow" style="flex:0 0 auto"><input id="collectionUnallocOn" type="checkbox" onchange="renderCollectionPicker()"><span>Unallocated collection (not linked to an invoice)</span></label><div class="field" style="max-width:200px"><label>Amount</label><input id="collectionAmount" type="number" min="0.01" step=".01"></div></div><div class="row" style="margin-top:10px;align-items:center;justify-content:space-between"><div id="collectionSummary" class="muted"></div><button class="primary" id="collectionSaveBtn" onclick="saveCollection()">Record Collection</button></div></div><div class="card" style="margin-top:12px"><div id="collectionTable"></div></div></section>
 <section id="reports" class="page"><div class="pageHead"><div><h2>Detailed Financial Reports</h2><div class="pageSub">Income Statement, Cash Flow, Balance Sheet and supporting schedules — every figure is traceable to its source record.</div></div></div><div class="card filterCard"><div class="row filterRow"><div class="field"><label>Period</label><select id="period"><option value="day">Day</option><option value="week">Week</option><option value="month" selected>Month</option><option value="year">Year</option><option value="custom">Custom Date Range</option></select></div><div class="field"><label>From / As-of</label><input id="fromDate" type="date"></div><div class="field"><label>To</label><input id="toDate" type="date"></div><button class="secondary" onclick="applyReportPeriod()">Apply</button><button class="primary" onclick="downloadReport()">⬇ Download Detailed Excel</button></div></div><div class="notice"><b>Every major figure below is clickable.</b> Follow <b>Summary → Category → Transaction → Source Record</b> to understand exactly where the number came from.<div class="vb-info">Dili lang ni consolidated total. I-click ang amount para ma-trace nimo ang actual sales, purchases, collections, expenses, inventory movements, ug spoilage.</div></div><div id="reportCards" class="grid"></div></section>
 <section id="settings" class="page">
 <div class="pageHead"><div><h2>Settings</h2><div class="pageSub">Branding, receipts, owner SMS alerts, backups and system maintenance for this installation.</div></div></div>
@@ -883,14 +886,14 @@ function renderCashCategories(){const dir=$('cashDir').value;const items=categor
 $('cashDir').onchange=renderCashCategories;$('cashCatBtn').onclick=()=>{const m=$('cashCatMenu');const open=m.classList.toggle('open');$('cashCatBtn').setAttribute('aria-expanded',open?'true':'false')};document.addEventListener('click',e=>{if(!$('cashCatWrap').contains(e.target))closeCashCategoryMenu()});renderCashCategories();
 $('saleProduct').onchange=()=>{const p=products.find(x=>x.id==$('saleProduct').value);if(p){$('salePrice').value=p.selling_price||'';}};
 $('purchaseProduct').onchange=()=>{const p=products.find(x=>x.id==$('purchaseProduct').value);if(p)$('purchaseCost').value=p.unit_cost||''};
-$('collectionSale').onchange=()=>{const s=sales.find(x=>x.id==$('collectionSale').value);if(s){$('collectionCustomer').value=s.customer||'';$('collectionAmount').value='';}};
+
 let alerts={counts:{low_stock:0,expiring_soon:0,expired:0},totals:{},low_stock:[],expiring_soon:[],expired:[]};
 let showArchived=false, expandedLots=new Set();
 async function load(){if(loadPromise)return loadPromise;loadPromise=(async()=>{try{[products,cash,sales,purchases,collections,reportCache,alerts]=await Promise.all([api('/products'+(showArchived?'?includeArchived=1':'')),api('/cash'),api('/sales'),api('/purchases'),api('/collections'),api('/reports?from=1900-01-01&to=2999-12-31'),api('/alerts')]);render();renderDashboard();renderAlerts();loadSpoilageQueue().catch(()=>{});loadAnalytics(true).catch(()=>{});setSync('Synced');}catch(e){setSync('Offline / API error',true);throw e}finally{loadPromise=null}})();return loadPromise}
 function scheduleRealtimeRefresh(){clearTimeout(realtimeRefreshTimer);realtimeRefreshTimer=setTimeout(()=>load().catch(()=>{}),180)}
 function setSync(text,bad=false){$('syncStatus').textContent=text;$('syncStatus').className='status '+(bad?'bad':'ok')}
 function tab(headers,rows,empty='No records'){const lab=h=>String(h).replace(/<[^>]*>/g,'').replace(/"/g,'&quot;').trim();return `<div class="tablewrap"><table><thead><tr>${headers.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.length?rows.map(r=>`<tr>${r.map((x,i)=>`<td data-label="${lab(headers[i]||'')}"${i===0?' data-primary="1"':''}>${x}</td>`).join('')}</tr>`).join(''):`<tr><td colspan="${headers.length}" class="empty tdEmpty">${empty}</td></tr>`}</tbody></table></div>`}
-function render(){renderProducts();renderCash();renderSales();renderPurchases();renderCollections();$('saleProduct').innerHTML=products.map(p=>`<option value="${p.id}">${esc(p.name)} — stock ${num(p.stock_qty).toFixed(3)} ${esc(p.unit)}</option>`).join('');$('purchaseProduct').innerHTML=products.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join('');$('spoilageProduct').innerHTML=products.map(p=>`<option value="${p.id}">${esc(p.name)} — stock ${num(p.stock_qty).toFixed(3)} ${esc(p.unit)}</option>`).join('');$('collectionSale').innerHTML='<option value="">Unallocated collection</option>'+sales.filter(x=>String(x.payment_status).toLowerCase()!=='cash').map(x=>`<option value="${x.id}">Sale #${x.id} — ${esc(x.customer||'Customer')} — ${money(x.total)}</option>`).join('');$('saleProduct').onchange();$('purchaseProduct').onchange();$('spoilageProduct').onchange=renderSpoilageLots;renderSpoilageLots();
+function render(){renderProducts();renderCash();renderSales();renderPurchases();renderCollections();$('saleProduct').innerHTML=products.map(p=>`<option value="${p.id}">${esc(p.name)} — stock ${num(p.stock_qty).toFixed(3)} ${esc(p.unit)}</option>`).join('');$('purchaseProduct').innerHTML=products.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join('');$('spoilageProduct').innerHTML=products.map(p=>`<option value="${p.id}">${esc(p.name)} — stock ${num(p.stock_qty).toFixed(3)} ${esc(p.unit)}</option>`).join('');renderCollectionCustomers();$('saleProduct').onchange();$('purchaseProduct').onchange();$('spoilageProduct').onchange=renderSpoilageLots;renderSpoilageLots();
 
 const tx=[...cash.map(x=>({date:x.date,id:x.id,type:x.direction==='in'?'Cash In':'Cash Out',label:x.category,amount:x.amount,kind:'cash'})),...sales.map(x=>({date:x.date,id:x.id,type:'Sale',label:x.customer||'',amount:x.total,kind:'sale'})),...purchases.map(x=>({date:x.date,id:x.id,type:'Purchase',label:x.supplier||'',amount:x.total,kind:'purchase'})),...collections.map(x=>({date:x.date,id:x.id,type:'Collection',label:x.customer||'',amount:x.amount,kind:'collection'}))].sort((a,b)=>String(b.date).localeCompare(String(a.date))||b.id-a.id).slice(0,15);$('recent').innerHTML=tab(['Date','Type','Category / Party','Amount','Detail'],tx.map(x=>[esc(x.date),esc(x.type),esc(x.label),money(x.amount),`<button class="secondary small" onclick="openTransaction('${x.kind}',${x.id})">View</button>`]));
 }
@@ -1221,7 +1224,7 @@ function renderCash(){$('cashTable').innerHTML=tab(['Date','Direction','Category
 --------------------------------------------------------------------------- */
 function newGroupRef(prefix){return `${prefix}${Date.now().toString(36).toUpperCase()}${Math.random().toString(36).slice(2,6).toUpperCase()}`}
 const expandedTxGroups=new Set();
-function toggleTxGroup(key){expandedTxGroups.has(key)?expandedTxGroups.delete(key):expandedTxGroups.add(key);renderSales();renderPurchases()}
+function toggleTxGroup(key){expandedTxGroups.has(key)?expandedTxGroups.delete(key):expandedTxGroups.add(key);renderSales();renderPurchases();renderCollections()}
 function groupTransactions(rows,partyField){
   const groups=[];const byKey=new Map();
   for(const r of rows){
@@ -1239,7 +1242,7 @@ function groupTable(headers,groups,buildSummary,buildDetail,detailHeaders,empty)
     const open=expandedTxGroups.has(g.key);
     const cells=buildSummary(g,open).map((x,i)=>`<td data-label="${lab(headers[i]||'')}"${i===0?' data-primary="1"':''}>${x}</td>`).join('');
     const detail=open&&g.lines.length>1
-      ? `<tr><td colspan="${headers.length}"><div class="reportSubDetail"><b>${g.lines.length} product line(s)</b><div class="tablewrap"><table><thead><tr>${detailHeaders.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${g.lines.map(l=>`<tr>${buildDetail(l).map(x=>`<td>${x}</td>`).join('')}</tr>`).join('')}</tbody></table></div></div></td></tr>`
+      ? `<tr><td colspan="${headers.length}"><div class="reportSubDetail"><b>${g.lines.length} line(s)</b><div class="tablewrap"><table><thead><tr>${detailHeaders.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${g.lines.map(l=>`<tr>${buildDetail(l).map(x=>`<td>${x}</td>`).join('')}</tr>`).join('')}</tbody></table></div></div></td></tr>`
       : '';
     return `<tr>${cells}</tr>${detail}`;
   }).join('');
@@ -1277,7 +1280,126 @@ function renderPurchases(){
       g.lines.length===1?`<button class="secondary small" onclick="openTransaction('purchase',${g.ids[0]})">View</button>`:`<button class="secondary small" onclick="toggleTxGroup('${g.key}')">${open?'Hide':'Show'} lines</button>`];
   },l=>[l.id,esc(l.product_name),num(l.quantity).toFixed(3),money(l.unit_cost),money(l.total),`<button class="secondary small" onclick="openTransaction('purchase',${l.id})">View</button>`],detailHeaders,'No records');
 }
-function renderCollections(){$('collectionTable').innerHTML=tab(['ID','Date','Customer','Amount','Reference','Sale Link','Detail'],collections.map(x=>[x.id,esc(x.date),esc(x.customer),money(x.amount),esc(x.reference),x.sale_id?`Sale #${x.sale_id}`:'Unallocated',`<button class="secondary small" onclick="openTransaction('collection',${x.id})">View</button>`]));}
+/* ==========================================================================
+   COLLECTIONS / AR
+   The invoice picker is driven purely by stored data: an invoice is "open"
+   only while sale.total minus every non-voided collection linked to it is
+   still positive, so a fully paid invoice disappears by itself. Customers
+   with nothing outstanding never appear in the customer dropdown.
+   One payment can settle several invoices; every line it posts carries the
+   same group_ref, so the table shows it as ONE collection line - exactly how
+   grouped sales and purchases behave.
+--------------------------------------------------------------------------- */
+const colKey=n=>String(n||'').trim().toLowerCase();
+let colSelection=new Map();   // sale_id -> amount typed by the owner
+function collectionPaidMap(){const m=new Map();for(const c of collections){if(!c.sale_id)continue;m.set(c.sale_id,(m.get(c.sale_id)||0)+num(c.amount))}return m}
+function openInvoices(){
+  const paid=collectionPaidMap();
+  return sales.filter(s=>String(s.payment_status).toLowerCase()!=='cash').map(s=>{
+    const p=paid.get(s.id)||0, bal=Math.round((num(s.total)-p)*100)/100;
+    return {...s,paid_amount:p,balance:bal};
+  }).filter(x=>x.balance>0.005).sort((a,b)=>colKey(a.customer).localeCompare(colKey(b.customer))||String(a.date).localeCompare(String(b.date))||a.id-b.id);
+}
+function openCustomers(){
+  const m=new Map();
+  for(const inv of openInvoices()){
+    const k=colKey(inv.customer)||'(no name)';
+    const e=m.get(k)||{name:String(inv.customer||'').trim()||'(no name)',balance:0,count:0};
+    e.balance+=inv.balance;e.count++;m.set(k,e);
+  }
+  return [...m.values()].sort((a,b)=>a.name.localeCompare(b.name));
+}
+function renderCollectionCustomers(){
+  const sel=$('collectionCustomer');if(!sel)return;
+  const list=openCustomers(), current=sel.value;
+  sel.innerHTML=list.length
+    ? '<option value="">— Select customer —</option>'+list.map(c=>`<option value="${esc(colKey(c.name))}">${esc(c.name)} — Balance ${money(c.balance)} (${c.count} invoice${c.count>1?'s':''})</option>`).join('')
+    : '<option value="">No customer with an outstanding balance</option>';
+  sel.value=list.some(c=>colKey(c.name)===current)?current:'';
+  sel.disabled=!list.length;
+  renderCollectionPicker();
+}
+function onCollectionCustomer(){colSelection=new Map();renderCollectionPicker()}
+function selectedCustomerInvoices(){
+  const k=$('collectionCustomer')?$('collectionCustomer').value:'';
+  const inv=openInvoices();
+  return k?inv.filter(x=>colKey(x.customer)===k):inv;
+}
+function toggleColInvoice(id){
+  const inv=openInvoices().find(x=>x.id===id);if(!inv)return;
+  colSelection.has(id)?colSelection.delete(id):colSelection.set(id,inv.balance.toFixed(2));
+  renderCollectionPicker();
+}
+function setColAmount(id,v){colSelection.set(id,v);updateCollectionSummary()}
+function collectionLines(){
+  const out=[];
+  for(const inv of selectedCustomerInvoices()){
+    if(!colSelection.has(inv.id))continue;
+    out.push({sale_id:inv.id,customer:inv.customer,amount:num(colSelection.get(inv.id)),balance:inv.balance});
+  }
+  return out;
+}
+function updateCollectionSummary(){
+  const unalloc=$('collectionUnallocOn')&&$('collectionUnallocOn').checked;
+  const lines=collectionLines();
+  const total=unalloc?num($('collectionAmount').value):lines.reduce((a,l)=>a+l.amount,0);
+  const label=unalloc?`Unallocated collection — ${money(total)}`
+    :(lines.length?`Selected: ${lines.length} invoice${lines.length>1?'s':''} — ${money(total)}`:'Select one or more invoices to collect.');
+  $('collectionSummary').textContent=label;
+}
+function renderCollectionPicker(){
+  const box=$('collectionPicker');if(!box)return;
+  const unalloc=$('collectionUnallocOn')&&$('collectionUnallocOn').checked;
+  $('collectionAmount').disabled=!unalloc;
+  const k=$('collectionCustomer')?$('collectionCustomer').value:'';
+  const rows=selectedCustomerInvoices();
+  if(unalloc){box.innerHTML='<div class="notice">Unallocated collection: the payment reduces Accounts Receivable without linking to a specific invoice.</div>';updateCollectionSummary();return}
+  if(!openCustomers().length){box.innerHTML='<div class="notice">No outstanding credit sales — every customer is fully paid, so there is nothing to collect.</div>';updateCollectionSummary();return}
+  if(!k){box.innerHTML='<div class="notice">Choose a customer above to see all of their unpaid credit sales / invoices.</div>';updateCollectionSummary();return}
+  if(!rows.length){box.innerHTML='<div class="notice">This customer is fully paid — no open invoices remain.</div>';updateCollectionSummary();return}
+  const body=rows.map(inv=>{
+    const on=colSelection.has(inv.id);
+    return `<tr>
+      <td data-label="Pay" data-primary="1"><label class="chkRow"><input type="checkbox" ${on?'checked':''} onchange="toggleColInvoice(${inv.id})"><span>Sale #${inv.id}</span></label></td>
+      <td data-label="Date">${esc(inv.date)}</td>
+      <td data-label="Product">${esc(inv.product_name||'')}</td>
+      <td data-label="Invoice Total">${money(inv.total)}</td>
+      <td data-label="Paid">${money(inv.paid_amount)}</td>
+      <td data-label="Balance"><b>${money(inv.balance)}</b></td>
+      <td data-label="Amount to collect">${on?`<input type="number" min="0.01" step=".01" max="${inv.balance.toFixed(2)}" value="${esc(colSelection.get(inv.id))}" oninput="setColAmount(${inv.id},this.value)" style="max-width:130px">`:'<span class="muted">—</span>'}</td>
+    </tr>`;
+  }).join('');
+  box.innerHTML=`<div class="tablewrap"><table><thead><tr><th>Credit Sale / Invoice</th><th>Date</th><th>Product</th><th>Invoice Total</th><th>Paid</th><th>Balance</th><th>Amount to collect</th></tr></thead><tbody>${body}</tbody></table></div>`;
+  updateCollectionSummary();
+}
+function groupCollections(){
+  const groups=[];const byKey=new Map();
+  for(const c of collections){
+    const party=String(c.customer||'').trim();
+    const key=c.group_ref?`cg:${c.group_ref}`:`cl:${c.date}|${colKey(party)}|${colKey(c.reference)}`;
+    let g=byKey.get(key);
+    if(!g){g={key,date:c.date,party,reference:c.reference,ids:[],lines:[]};byKey.set(key,g);groups.push(g)}
+    g.ids.push(c.id);g.lines.push(c);
+  }
+  return groups;
+}
+function renderCollections(){
+  const groups=groupCollections();
+  const headers=['Transaction','Date','Customer','Invoices Paid','Amount','Reference','Detail'];
+  const detailHeaders=['ID','Date','Amount','Invoice','Reference','Detail'];
+  const colGroupCell=(g,open)=>{
+    if(g.lines.length===1)return `#${g.ids[0]}`;
+    const ids=[...g.ids].sort((a,b)=>a-b);
+    return `<button class="secondary small grpToggle" onclick="toggleTxGroup('${g.key}')">${open?'▾':'▸'} #${ids[0]}–#${ids[ids.length-1]}</button><div class="muted">${g.lines.length} invoices</div>`;
+  };
+  $('collectionTable').innerHTML=groupTable(headers,groups,(g,open)=>{
+    const amount=g.lines.reduce((a,l)=>a+num(l.amount),0);
+    const links=g.lines.map(l=>l.sale_id?`Sale #${l.sale_id}`:'Unallocated');
+    const summary=links.length>3?`${links.slice(0,3).join(', ')} +${links.length-3} more`:links.join(', ');
+    return [colGroupCell(g,open),esc(g.date),esc(g.party),esc(summary),money(amount),esc(g.reference),
+      g.lines.length===1?`<button class="secondary small" onclick="openTransaction('collection',${g.ids[0]})">View</button>`:`<button class="secondary small" onclick="toggleTxGroup('${g.key}')">${open?'Hide':'Show'} lines</button>`];
+  },l=>[l.id,esc(l.date),money(l.amount),l.sale_id?`Sale #${l.sale_id}`:'Unallocated',esc(l.reference),`<button class="secondary small" onclick="openTransaction('collection',${l.id})">View</button>`],detailHeaders,'No records');
+}
 async function saveCash(){const btn=$('cashSaveBtn');btn.disabled=true;try{await api('/cash',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({date:$('cashDate').value,direction:$('cashDir').value,category:$('cashCat').value,amount:Number($('cashAmt').value),description:$('cashDesc').value})});$('cashAmt').value='';$('cashDesc').value='';showToast('Cash transaction saved.');await load()}catch(e){showToast(e.message,true)}finally{btn.disabled=false}}
 /* ==========================================================================
    POS-style carts for Sales and Purchases.
@@ -1409,7 +1531,44 @@ async function savePurchase(){
   try{await load()}catch{}
   renderPurchaseCart();
 }
-async function saveCollection(){try{const r=await api('/collections',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({date:$('collectionDate').value,customer:$('collectionCustomer').value,amount:Number($('collectionAmount').value),reference:$('collectionRef').value,sale_id:$('collectionSale').value||null})});showToast(`Collection #${r.id} saved. It reduced receivables.`);$('collectionAmount').value='';$('collectionRef').value='';await load()}catch(e){showToast(e.message,true)}}
+async function saveCollection(){
+  const btn=$('collectionSaveBtn');
+  const date=$('collectionDate').value, reference=$('collectionRef').value;
+  const unalloc=$('collectionUnallocOn').checked;
+  let lines=[];
+  if(unalloc){
+    const amount=Number($('collectionAmount').value);
+    if(!(amount>0))return showToast('Enter the collection amount.',true);
+    const name=(openCustomers().find(c=>colKey(c.name)===$('collectionCustomer').value)||{}).name||'';
+    lines=[{sale_id:null,customer:name,amount}];
+  }else{
+    lines=collectionLines();
+    if(!lines.length)return showToast('Select at least one invoice to collect.',true);
+    const bad=lines.find(l=>!(l.amount>0)||l.amount>l.balance+0.005);
+    if(bad)return showToast(`Amount for Sale #${bad.sale_id} must be greater than 0 and at most ${money(bad.balance)}.`,true);
+  }
+  btn.disabled=true;
+  // One payment = one group_ref shared by every invoice line it settles, so the
+  // table renders it as a single collection while the ledger keeps one balanced
+  // entry per invoice (Cash debit / Accounts Receivable credit).
+  const groupRef=lines.length>1?newGroupRef('COL'):null;
+  const ok=[],failed=[];
+  for(const l of lines){
+    try{
+      const r=await api('/collections',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({date,customer:l.customer,amount:l.amount,reference,sale_id:l.sale_id,group_ref:groupRef})});
+      ok.push(r.id);
+    }catch(e){failed.push(e.message)}
+  }
+  btn.disabled=false;
+  if(ok.length){
+    const total=lines.slice(0,ok.length).reduce((a,l)=>a+l.amount,0);
+    showToast(`Collection recorded (${ok.length} invoice line${ok.length>1?'s':''}, ${money(total)}). Receivables reduced.`);
+    colSelection=new Map();$('collectionAmount').value='';$('collectionRef').value='';$('collectionUnallocOn').checked=false;
+  }
+  if(failed.length)showToast(`${failed.length} line(s) not recorded — ${failed[0]}`,true);
+  try{await load()}catch{}
+  renderCollectionPicker();
+}
 function openProduct(){$('productModal').classList.add('open')}function closeModal(id){$(id).classList.remove('open')}
 async function saveProduct(){try{const r=await api('/products',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:$('pName').value,sku:$('pSku').value,category:$('pCat').value,unit:$('pUnit').value,source_type:$('pSource').value,unit_cost:Number($('pCost').value||0),selling_price:Number($('pPrice').value||0),reorder_level:Number($('pReorder').value||0),is_perishable:Number($('pPerishable').value||0),has_expiration:Number($('pHasExp').value||0),shelf_life_days:Number($('pShelf').value||0),expiry_alert_days:Number($('pAlert').value||7),notes:$('pNotes').value,opening_qty:Number($('pOpen').value||0),opening_date:$('pOpenDate').value,opening_lot_code:$('pOpenLot').value,opening_expiry_date:$('pOpenExp').value})});closeModal('productModal');['pName','pSku','pCat','pCost','pPrice','pReorder','pOpen','pOpenLot','pOpenExp','pNotes'].forEach(id=>$(id).value='');showToast(`Product #${r.id} saved.`);await load()}catch(e){showToast(e.message,true)}}
 $('importFile').onchange=async()=>{if(!$('importFile').files[0])return;const fd=new FormData();fd.append('file',$('importFile').files[0]);try{const r=await api('/products/import',{method:'POST',body:fd});showToast(r.message||`Imported ${r.count}`);if(r.skipped?.length)showToast(`${r.skipped.length} row(s) were skipped. Check data.`);$('importFile').value='';await load()}catch(e){showToast(e.message,true)}};
