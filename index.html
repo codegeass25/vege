@@ -142,6 +142,19 @@ main{margin:0;padding:var(--s6) var(--s6) var(--s8);padding-left:calc(var(--nav-
 .field{display:flex;flex-direction:column;gap:5px;min-width:0}
 .field label{font-size:var(--fs-2);font-weight:650;color:var(--ink-2)}
 input,select,textarea{padding:11px 12px;border:1px solid #cdd8d0;border-radius:var(--r-sm);background:#fff;width:100%;min-height:44px}
+/* Global searchable dropdown UI. Native select values remain authoritative. */
+.searchableSelect{position:relative;width:100%;min-width:0}
+.searchableSelectNative{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;opacity:0!important;pointer-events:none!important}
+.searchableSelectInput{width:100%!important;background:#fff!important;padding:11px 34px 11px 12px!important;cursor:text!important}
+.searchableSelectInput:disabled{cursor:not-allowed!important;background:var(--surface-2)!important;color:var(--muted)!important}
+.searchableSelectArrow{position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:12px;pointer-events:none}
+.searchableSelectMenu{position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:120;display:none;max-height:280px;overflow:auto;background:#fff;border:1px solid #cdd8d0;border-radius:var(--r-sm);box-shadow:0 12px 28px rgba(12,22,16,.16)}
+.searchableSelectMenu.open{display:block}
+.searchableSelectOption{display:flex;align-items:center;min-height:40px;padding:9px 12px;border:0;background:#fff;color:var(--ink);width:100%;text-align:left;cursor:pointer;font:inherit}
+.searchableSelectOption:hover,.searchableSelectOption.active{background:var(--surface-3)}
+.searchableSelectOption.selected{font-weight:750;color:var(--g2)}
+.searchableSelectEmpty{padding:10px 12px;color:var(--muted);font-size:var(--fs-2)}
+
 input[type=color]{padding:3px}
 input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--focus);outline-offset:1px;border-color:var(--g)}
 input:disabled,select:disabled{background:var(--surface-2);color:var(--muted)}
@@ -181,7 +194,7 @@ label.secondary{cursor:pointer}
 .cashSelectBtn{width:100%;padding:11px 12px;border:1px solid #cdd8d0;border-radius:var(--r-sm);background:#fff;color:var(--ink);display:flex;align-items:center;justify-content:space-between;gap:var(--s3);cursor:pointer;text-align:left;min-height:44px}
 .cashSelectBtn:focus-visible{outline:3px solid var(--focus);border-color:var(--g)}
 .cashSelectMenu{position:absolute;left:0;right:0;top:calc(100% + 5px);z-index:80;background:#fff;border:1px solid #cdd8d0;border-radius:var(--r-md);box-shadow:var(--sh-2);max-height:min(60vh,330px);overflow:auto;display:none;padding:5px}
-.cashSelectMenu.open{display:block}
+.cashSelectMenu.open{display:block}.cashSelectSearch{width:100%;min-height:38px!important;padding:9px 10px!important;margin-bottom:5px!important;box-sizing:border-box}
 .cashOpt{width:100%;border:0;background:#fff;text-align:left;padding:10px;border-radius:var(--r-sm);cursor:pointer;color:var(--ink)}
 .cashOpt:hover,.cashOpt.active{background:var(--tint)}
 .cashOptTitle{display:block;font-weight:700;font-size:var(--fs-2);line-height:1.25}
@@ -672,6 +685,132 @@ const assetUrl=(v,version)=>{if(!v)return'';if(/^https?:\/\//i.test(v))return v;
 let deferredInstallPrompt=null;let realtimeConnection=null;let loadPromise=null;let realtimeRefreshTimer=null;
 const NEUTRAL_BRAND={companyName:'Business Manager',tagline:'Business Manager',primaryColor:'#46554d',secondaryColor:'#2f3b34',backgroundColor:'#f4f6f4'};
 function setText(id,value){const el=$(id);if(el)el.textContent=value}
+/* ==========================================================================\n   GLOBAL SEARCHABLE DROPDOWNS\n   Every native <select> remains the authoritative form control. The wrapper\n   adds type-to-search, while existing .value/.onchange business logic stays\n   unchanged. Options can be rebuilt dynamically at any time.\n   ========================================================================== */
+const searchableSelectState=new WeakMap();
+function searchableSelectLabel(select){
+  const opt=select?.options?.[select.selectedIndex];
+  return opt?String(opt.textContent||'').trim():'';
+}
+function closeAllSearchableSelects(exceptWrap=null){
+  document.querySelectorAll('.searchableSelectMenu.open').forEach(menu=>{
+    const wrap=menu.parentElement;
+    if(exceptWrap&&wrap===exceptWrap)return;
+    menu.classList.remove('open');
+    const input=wrap?.querySelector('.searchableSelectInput');
+    if(input)input.setAttribute('aria-expanded','false');
+  });
+}
+function renderSearchableSelectMenu(select,filter=''){
+  const state=searchableSelectState.get(select); if(!state)return;
+  const q=String(filter||'').trim().toLowerCase();
+  const options=[...select.options]
+    .map((o,index)=>({o,index}))
+    .filter(({o})=>!o.hidden && !o.disabled && (!q || String(o.textContent||'').toLowerCase().includes(q)));
+  state.menu.innerHTML='';
+  if(!options.length){state.menu.innerHTML='<div class="searchableSelectEmpty">No matching available option.</div>';return;}
+  const frag=document.createDocumentFragment();
+  for(const {o,index} of options){
+    const b=document.createElement('button');
+    b.type='button';
+    b.className='searchableSelectOption'+(index===select.selectedIndex?' selected active':'');
+    b.dataset.index=String(index);
+    b.setAttribute('role','option');
+    b.setAttribute('aria-selected',index===select.selectedIndex?'true':'false');
+    b.textContent=String(o.textContent||'').trim();
+    frag.appendChild(b);
+  }
+  state.menu.appendChild(frag);
+}
+function syncSearchableSelect(select){
+  const state=searchableSelectState.get(select); if(!state)return;
+  state.input.disabled=!!select.disabled;
+  state.input.setAttribute('aria-disabled',select.disabled?'true':'false');
+  if(document.activeElement!==state.input)state.input.value=searchableSelectLabel(select);
+  const filter=document.activeElement===state.input?state.input.value:'';
+  renderSearchableSelectMenu(select,filter);
+}
+function openSearchableSelect(select){
+  const state=searchableSelectState.get(select); if(!state||select.disabled)return;
+  closeAllSearchableSelects(state.wrap);
+  state.input.value='';
+  renderSearchableSelectMenu(select,'');
+  state.menu.classList.add('open');
+  state.input.setAttribute('aria-expanded','true');
+}
+function selectSearchableOption(select,index){
+  const state=searchableSelectState.get(select); if(!state)return;
+  const option=select.options[index]; if(!option||option.disabled)return;
+  select.selectedIndex=index;
+  state.input.value=String(option.textContent||'').trim();
+  state.menu.classList.remove('open');
+  state.input.setAttribute('aria-expanded','false');
+  select.dispatchEvent(new Event('change',{bubbles:true}));
+}
+function enhanceSearchableSelect(select){
+  if(!select||searchableSelectState.has(select))return;
+  const wrap=document.createElement('div');
+  wrap.className='searchableSelect';
+  select.parentNode.insertBefore(wrap,select);
+  wrap.appendChild(select);
+  select.classList.add('searchableSelectNative');
+
+  const input=document.createElement('input');
+  input.type='search';
+  input.className='searchableSelectInput';
+  input.autocomplete='off';
+  input.spellcheck=false;
+  input.placeholder='Type to search…';
+  input.setAttribute('role','combobox');
+  input.setAttribute('aria-autocomplete','list');
+  input.setAttribute('aria-expanded','false');
+  input.setAttribute('aria-controls',`search-menu-${select.id}`);
+
+  const arrow=document.createElement('span');
+  arrow.className='searchableSelectArrow';
+  arrow.textContent='▾';
+  arrow.setAttribute('aria-hidden','true');
+
+  const menu=document.createElement('div');
+  menu.className='searchableSelectMenu';
+  menu.id=`search-menu-${select.id}`;
+  menu.setAttribute('role','listbox');
+
+  wrap.insertBefore(input,select);
+  wrap.appendChild(arrow);
+  wrap.appendChild(menu);
+  searchableSelectState.set(select,{wrap,input,menu,observer:null});
+
+  input.addEventListener('focus',()=>openSearchableSelect(select));
+  input.addEventListener('click',()=>{if(!menu.classList.contains('open'))openSearchableSelect(select)});
+  input.addEventListener('input',()=>{
+    if(select.disabled)return;
+    if(!menu.classList.contains('open'))menu.classList.add('open');
+    input.setAttribute('aria-expanded','true');
+    renderSearchableSelectMenu(select,input.value);
+  });
+  input.addEventListener('keydown',e=>{
+    if(e.key==='Escape'){menu.classList.remove('open');input.setAttribute('aria-expanded','false');input.value=searchableSelectLabel(select);return;}
+    if(e.key==='ArrowDown'&&!menu.classList.contains('open')){e.preventDefault();openSearchableSelect(select);return;}
+    if(e.key==='Enter'&&menu.classList.contains('open')){
+      const first=menu.querySelector('.searchableSelectOption');
+      if(first){e.preventDefault();selectSearchableOption(select,Number(first.dataset.index));}
+    }
+  });
+  menu.addEventListener('mousedown',e=>e.preventDefault());
+  menu.addEventListener('click',e=>{
+    const b=e.target.closest('.searchableSelectOption');
+    if(b)selectSearchableOption(select,Number(b.dataset.index));
+  });
+  select.addEventListener('change',()=>syncSearchableSelect(select));
+
+  const observer=new MutationObserver(()=>syncSearchableSelect(select));
+  observer.observe(select,{childList:true,subtree:true,attributes:true,attributeFilter:['disabled']});
+  searchableSelectState.get(select).observer=observer;
+  syncSearchableSelect(select);
+}
+function enhanceAllSearchableSelects(){document.querySelectorAll('select').forEach(enhanceSearchableSelect);}
+document.addEventListener('click',e=>{if(!e.target.closest('.searchableSelect'))closeAllSearchableSelects();});
+
 function setImg(id,url){const el=$(id);if(!el)return;if(url){el.src=url;el.style.display='block'}else{el.removeAttribute('src');el.style.display='none'}}
 function brandingManifestUrl(s){const version=s?.brandingVersion||s?._brandingVersion||s?._updatedAt||'';return './manifest.webmanifest'+(version?`?v=${encodeURIComponent(version)}`:'')}
 function applyBranding(s){settings={...NEUTRAL_BRAND,...(s||{})};document.title=(settings.companyName||NEUTRAL_BRAND.companyName)+' — Business Manager';document.documentElement.style.setProperty('--g',settings.primaryColor||NEUTRAL_BRAND.primaryColor);document.documentElement.style.setProperty('--g2',settings.secondaryColor||NEUTRAL_BRAND.secondaryColor);document.documentElement.style.setProperty('--bg',settings.backgroundColor||NEUTRAL_BRAND.backgroundColor);const name=settings.companyName||NEUTRAL_BRAND.companyName;const tag=settings.tagline||NEUTRAL_BRAND.tagline;setText('appTitle',name);setText('appSubtitle',tag);setText('loginTitle',name+' — Owner Login');setText('loginTagline',tag);setText('splashTitle',name);setText('sidebarBrandName',name);setText('sidebarBrandSub',tag);const splash=assetUrl(settings.loadingLogo);const header=assetUrl(settings.browserLogo);setImg('splashLogo',splash);setImg('loginLogo',splash);setImg('headerLogo',header);setImg('sidebarLogo',header||splash);const fav=assetUrl(settings.favicon||settings.browserLogo);let favicon=document.querySelector('link[data-whitelabel-favicon]');if(fav){if(!favicon){favicon=document.createElement('link');favicon.rel='icon';favicon.dataset.whitelabelFavicon='1';document.head.appendChild(favicon)}favicon.href=fav}else if(favicon){favicon.remove()};let apple=document.querySelector('link[data-whitelabel-apple]');const appleUrl=assetUrl(settings.desktopIcon)||assetUrl(settings.browserLogo);if(appleUrl){if(!apple){apple=document.createElement('link');apple.rel='apple-touch-icon';apple.dataset.whitelabelApple='1';document.head.appendChild(apple)}apple.href=appleUrl}else if(apple){apple.remove()};const tm=document.querySelector('meta[name="theme-color"]');if(tm)tm.content=settings.primaryColor||NEUTRAL_BRAND.primaryColor;const titleMeta=document.querySelector('meta[name="apple-mobile-web-app-title"]');if(titleMeta)titleMeta.content=name;const manifest=document.getElementById('appManifest');if(manifest)manifest.href=brandingManifestUrl(settings);try{renderSettings()}catch(e){console.warn('Optional settings UI initialization skipped:',e)}}
@@ -880,9 +1019,10 @@ const cashExamples={
 };
 function closeCashCategoryMenu(){const m=$('cashCatMenu');const b=$('cashCatBtn');if(m&&b){m.classList.remove('open');b.setAttribute('aria-expanded','false')}}
 function selectCashCategory(cat){$('cashCat').value=cat;$('cashCatBtn').innerHTML=`${esc(cat)} <span>▾</span>`;$('cashCatMenu').querySelectorAll('.cashOpt').forEach(x=>x.classList.toggle('active',x.dataset.value===cat));closeCashCategoryMenu();loadCashLinkedOptions().catch(()=>{})}
-function renderCashCategories(){const dir=$('cashDir').value;const items=categories(dir);const current=items.includes($('cashCat').value)?$('cashCat').value:items[0];$('cashCatMenu').innerHTML=items.map((x,i)=>`<button type="button" class="cashOpt${x===current?' active':''}" data-value="${esc(x)}" role="option" aria-selected="${x===current?'true':'false'}"><span class="cashOptTitle">${esc(x)}</span><span class="cashOptExample">${esc('*Pananglitan: '+(cashExamples[x]||'Sample nga paggamit alang sa '+x+'.'))}</span></button>`).join('');$('cashCatMenu').querySelectorAll('.cashOpt').forEach(btn=>btn.onclick=()=>selectCashCategory(btn.dataset.value));selectCashCategory(current)}
+function renderCashCategories(){const dir=$('cashDir').value;const items=categories(dir);const current=items.includes($('cashCat').value)?$('cashCat').value:items[0];$('cashCatMenu').innerHTML=`<input type="search" class="cashSelectSearch" id="cashCatSearch" autocomplete="off" placeholder="Type to search categories…" aria-label="Search cash categories">`+items.map((x,i)=>`<button type="button" class="cashOpt${x===current?' active':''}" data-value="${esc(x)}" role="option" aria-selected="${x===current?'true':'false'}"><span class="cashOptTitle">${esc(x)}</span><span class="cashOptExample">${esc('*Pananglitan: '+(cashExamples[x]||'Sample nga paggamit alang sa '+x+'.'))}</span></button>`).join('');const search=$('cashCatSearch');if(search)search.oninput=()=>{const q=search.value.trim().toLowerCase();$('cashCatMenu').querySelectorAll('.cashOpt').forEach(btn=>btn.style.display=!q||btn.textContent.toLowerCase().includes(q)?'':'none')};$('cashCatMenu').querySelectorAll('.cashOpt').forEach(btn=>btn.onclick=()=>selectCashCategory(btn.dataset.value));selectCashCategory(current)}
 async function loadCashLinkedOptions(){const loanField=$('cashLoanField'),assetField=$('cashAssetField');const cat=$('cashCat').value;loanField.classList.toggle('hidden',cat!=='Loan Principal Repayment');assetField.classList.toggle('hidden',cat!=='Sale of Fixed Asset');if(cat==='Loan Principal Repayment'){try{const asOf=$('cashDate').value||today;const r=await api('/loans/options?asOf='+encodeURIComponent(asOf));const rows=r.loans||[];$('cashLoan').innerHTML=rows.length?'<option value="">— Select loan —</option>'+rows.map(x=>`<option value="${x.source_id}">${esc(x.loan_id)} — ${esc(x.date)} — Outstanding ${money(x.outstanding_amount)}</option>`).join(''):'<option value="">No outstanding loans</option>';}catch(e){$('cashLoan').innerHTML='<option value="">Unable to load loans</option>';showToast(e.message,true)}}else if(cat==='Sale of Fixed Asset'){try{const asOf=$('cashDate').value||today;const r=await api('/fixed-assets/options?asOf='+encodeURIComponent(asOf));const rows=r.assets||[];$('cashAsset').innerHTML=rows.length?'<option value="">— Select fixed asset —</option>'+rows.map(x=>`<option value="${x.id}">#${x.id} — ${esc(x.description||'Fixed asset')} — Carrying ${money(x.carrying_value)}</option>`).join(''):'<option value="">No open fixed assets</option>';}catch(e){$('cashAsset').innerHTML='<option value="">Unable to load assets</option>';showToast(e.message,true)}}}
 $('cashDir').onchange=renderCashCategories;$('cashDate').onchange=loadCashLinkedOptions;$('cashCatBtn').onclick=()=>{const m=$('cashCatMenu');const open=m.classList.toggle('open');$('cashCatBtn').setAttribute('aria-expanded',open?'true':'false')};document.addEventListener('click',e=>{if(!$('cashCatWrap').contains(e.target))closeCashCategoryMenu()});renderCashCategories();
+enhanceAllSearchableSelects();
 $('saleProduct').onchange=()=>{const p=products.find(x=>x.id==$('saleProduct').value);if(p){$('salePrice').value=p.selling_price||'';}updateCreditDiscountUI()};
 $('saleStatus').onchange=()=>{if(String($('saleStatus').value||'Credit').toLowerCase()==='cash')$('saleDiscount').value='0';updateCreditDiscountUI()};
 $('salePrice').oninput=updateCreditDiscountUI;
@@ -902,32 +1042,57 @@ async function loadPayableOptions(){
 }
 let showArchived=false, expandedLots=new Set();
 function saleSelectedOutletId(){return String($('saleOutlet')?.value||'');}
-function saleAvailableQty(productId,outletId){
+function outletProductQty(outletId,productId){
   if(!outletId)return num(products.find(p=>Number(p.id)===Number(productId))?.stock_qty);
-  const row=outletStock.find(x=>Number(x.outlet_id)===Number(outletId)&&Number(x.product_id)===Number(productId));
-  return num(row?.qty);
+  return outletStock.reduce((sum,row)=>{
+    return sum+(Number(row.outlet_id)===Number(outletId)&&Number(row.product_id)===Number(productId)?num(row.qty):0);
+  },0);
 }
+function saleAvailableQty(productId,outletId){return outletProductQty(outletId,productId)}
 function renderSaleProductOptions(preferredId){
   const sel=$('saleProduct');if(!sel)return;
   const outletId=saleSelectedOutletId();
   const outlet=outletId?outlets.find(o=>String(o.id)===outletId):null;
   const wanted=preferredId??sel.value;
-  const available=products.map(p=>({p,qty:saleAvailableQty(p.id,outletId)}));
+  const available=products.map(p=>({p,qty:saleAvailableQty(p.id,outletId)})).filter(x=>x.qty>0.000001);
   const labelFor=(p,qty)=>outlet
     ? `${esc(p.name)} — ${esc(outlet.name)} stock ${qty.toFixed(3)} ${esc(p.unit)}`
     : `${esc(p.name)} — Main stock ${qty.toFixed(3)} ${esc(p.unit)}`;
-  sel.innerHTML=available.map(({p,qty})=>`<option value="${p.id}" ${qty<=0.000001?'disabled':''}>${labelFor(p,qty)}${qty<=0.000001?' — unavailable':''}</option>`).join('');
-  const preferred=available.find(x=>String(x.p.id)===String(wanted)&&x.qty>0.000001);
-  const firstAvailable=available.find(x=>x.qty>0.000001);
+  sel.innerHTML=available.map(({p,qty})=>`<option value="${p.id}">${labelFor(p,qty)}</option>`).join('');
+  const preferred=available.find(x=>String(x.p.id)===String(wanted));
   if(preferred)sel.value=String(preferred.p.id);
-  else if(firstAvailable)sel.value=String(firstAvailable.p.id);
   else if(available.length)sel.value=String(available[0].p.id);
+  else sel.value='';
+  if(!available.length)sel.innerHTML='<option value="">No available products at this location</option>';
+}
+function renderSpoilageProductOptions(preferredId){
+  const sel=$('spoilageProduct');if(!sel)return;
+  const outletId=$('spoilageOutlet')?.value||'';
+  const wanted=preferredId??sel.value;
+  const available=products.map(p=>({p,qty:outletId?outletProductQty(outletId,p.id):num(p.stock_qty)})).filter(x=>x.qty>0.000001);
+  sel.innerHTML=available.map(({p,qty})=>`<option value="${p.id}">${esc(p.name)} — ${outletId?'Outlet':'Main'} stock ${qty.toFixed(3)} ${esc(p.unit)}</option>`).join('');
+  const preferred=available.find(x=>String(x.p.id)===String(wanted));
+  if(preferred)sel.value=String(preferred.p.id);
+  else if(available.length)sel.value=String(available[0].p.id);
+  else sel.value='';
+  if(!available.length)sel.innerHTML='<option value="">No available products at this location</option>';
+}
+function renderOutletTransferProductOptions(preferredId){
+  const sel=$('outletTransferProduct');if(!sel)return;
+  const wanted=preferredId??sel.value;
+  const available=products.map(p=>({p,qty:num(p.stock_qty)})).filter(x=>x.qty>0.000001);
+  sel.innerHTML=available.map(({p,qty})=>`<option value="${p.id}">${esc(p.name)} — Main stock ${qty.toFixed(3)} ${esc(p.unit)}</option>`).join('');
+  const preferred=available.find(x=>String(x.p.id)===String(wanted));
+  if(preferred)sel.value=String(preferred.p.id);
+  else if(available.length)sel.value=String(available[0].p.id);
+  else sel.value='';
+  if(!available.length)sel.innerHTML='<option value="">No stock available in Main Farm Inventory</option>';
 }
 async function load(){if(loadPromise)return loadPromise;loadPromise=(async()=>{try{const payDate=$('payableDate')?.value||today;[products,cash,sales,purchases,collections,supplierPayments,reportCache,alerts,payableOptions,salesConfig,outlets,outletStock]=await Promise.all([api('/products'+(showArchived?'?includeArchived=1':'')),api('/cash'),api('/sales'),api('/purchases'),api('/collections'),api('/supplier-payments'),api('/reports?from=1900-01-01&to=2999-12-31'),api('/alerts'),api(`/reports/detail?type=payables&to=${encodeURIComponent(payDate)}`),api('/sales/config'),api('/outlets'),api('/inventory/outlet-stock?to=2999-12-31')]);payableOptions=payableOptions.report||{suppliers:[],purchases:[],payments:[]};outlets=Array.isArray(outlets)?outlets:(Array.isArray(outlets?.rows)?outlets.rows:Array.isArray(outlets?.outlets)?outlets.outlets:[]);outletStock=Array.isArray(outletStock)?outletStock:(Array.isArray(outletStock?.rows)?outletStock.rows:Array.isArray(outletStock?.data)?outletStock.data:[]);payableOptionsDate=payDate;render();renderDashboard();updateCreditDiscountUI();renderAlerts();loadSpoilageQueue().catch(()=>{});loadAnalytics(true).catch(()=>{});setSync('Synced');}catch(e){setSync('Offline / API error',true);throw e}finally{loadPromise=null}})();return loadPromise}
 function scheduleRealtimeRefresh(){clearTimeout(realtimeRefreshTimer);realtimeRefreshTimer=setTimeout(()=>load().catch(()=>{}),180)}
 function setSync(text,bad=false){$('syncStatus').textContent=text;$('syncStatus').className='status '+(bad?'bad':'ok')}
 function tab(headers,rows,empty='No records'){const lab=h=>String(h).replace(/<[^>]*>/g,'').replace(/"/g,'&quot;').trim();return `<div class="tablewrap"><table><thead><tr>${headers.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.length?rows.map(r=>`<tr>${r.map((x,i)=>`<td data-label="${lab(headers[i]||'')}"${i===0?' data-primary="1"':''}>${x}</td>`).join('')}</tr>`).join(''):`<tr><td colspan="${headers.length}" class="empty tdEmpty">${empty}</td></tr>`}</tbody></table></div>`}
-function render(){renderProducts();renderCash();renderSales();renderPurchases();renderCollections();renderSupplierPayments();renderPayableSuppliers();$('purchaseProduct').innerHTML=products.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join('');$('spoilageProduct').innerHTML=products.map(p=>`<option value="${p.id}">${esc(p.name)} — stock ${num(p.stock_qty).toFixed(3)} ${esc(p.unit)}</option>`).join('');renderCollectionCustomers();$('saleProduct').onchange();$('purchaseProduct').onchange();$('spoilageProduct').onchange=renderSpoilageLots;renderSpoilageLots();renderOutletUI();renderSaleProductOptions();$('saleProduct').onchange();renderOutletStockTable();
+function render(){renderProducts();renderCash();renderSales();renderPurchases();renderCollections();renderSupplierPayments();renderPayableSuppliers();$('purchaseProduct').innerHTML=products.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join('');renderCollectionCustomers();renderOutletUI();renderSaleProductOptions();renderSpoilageProductOptions();renderOutletTransferProductOptions();$('saleProduct').onchange();$('purchaseProduct').onchange();$('spoilageProduct').onchange=()=>{renderSpoilageProductOptions();renderSpoilageLots();};renderSpoilageLots();renderOutletStockTable();
 
 const tx=[...cash.map(x=>({date:x.date,id:x.id,type:x.direction==='in'?'Cash In':'Cash Out',label:x.category,amount:x.amount,kind:'cash'})),...sales.map(x=>({date:x.date,id:x.id,type:'Sale',label:x.customer||'',amount:x.total,kind:'sale'})),...purchases.map(x=>({date:x.date,id:x.id,type:'Purchase',label:x.supplier||'',amount:x.total,kind:'purchase'})),...collections.map(x=>({date:x.date,id:x.id,type:'Collection',label:x.customer||'',amount:x.amount,kind:'collection'})),...supplierPayments.map(x=>({date:x.date,id:x.id,type:'Supplier Payment',label:x.supplier||'',amount:x.amount,kind:'supplier_payment'}))].sort((a,b)=>String(b.date).localeCompare(String(a.date))||b.id-a.id).slice(0,15);$('recent').innerHTML=tab(['Date','Type','Category / Party','Amount','Detail'],tx.map(x=>[esc(x.date),esc(x.type),esc(x.label),money(x.amount),`<button class="secondary small" onclick="openTransaction('${x.kind}',${x.id})">View</button>`]));
 }
@@ -1671,7 +1836,7 @@ $('importFile').onchange=async()=>{if(!$('importFile').files[0])return;const fd=
 $('lotImportFile').onchange=async()=>{if(!$('lotImportFile').files[0])return;const fd=new FormData();fd.append('file',$('lotImportFile').files[0]);try{const r=await api('/inventory/lots/import',{method:'POST',body:fd});showToast(r.message||`Imported ${r.count}`);if(r.skipped?.length)showToast(`${r.skipped.length} row(s) skipped: ${r.skipped.slice(0,3).map(x=>'row '+x.row+' — '+x.reason).join(' | ')}`,true);$('lotImportFile').value='';await load();await applyReportPeriod();}catch(e){showToast(e.message,true)}};
 async function renderSpoilageLots(){
   const p=products.find(x=>x.id==$('spoilageProduct')?.value); const outletId=$('spoilageOutlet')?.value||'';
-  if(!p)return;
+  if(!p){$('spoilageLot').innerHTML='<option value="">No lot available</option>';if($('spoilageLotHint'))$('spoilageLotHint').textContent='Select an available product at this location.';return;}
   if(outletId){
     try{const r=await api(`/inventory/outlet-stock/lots?outlet_id=${encodeURIComponent(outletId)}&product_id=${p.id}&date=${encodeURIComponent($('spoilageDate')?.value||today)}`);const rows=r.rows||[];$('spoilageLot').innerHTML='<option value="">Automatic FEFO at Outlet</option>'+rows.map(l=>`<option value="${l.id}">${esc(l.batch_lot||'Outlet lot #'+l.id)} • exp ${esc(l.expiry_date||'none')} • ${num(l.remaining_qty).toFixed(3)} ${esc(p.unit)}</option>`).join('');const bal=rows.reduce((a,l)=>a+num(l.remaining_qty),0);$('spoilageLotHint').innerHTML=`<b>${esc(outlets.find(o=>String(o.id)===String(outletId))?.name||'Outlet')}</b> has <b>${bal.toFixed(3)} ${esc(p.unit)}</b> of ${esc(p.name)} available for sale/spoilage.`;}catch(e){$('spoilageLot').innerHTML='<option value="">Unable to load outlet stock</option>';$('spoilageLotHint').textContent=e.message||'Unable to load outlet stock.'}return;
   }
@@ -1681,12 +1846,34 @@ async function recordSpoilage(){const btn=$('spoilageBtn');btn.disabled=true;try
 
 function renderOutletUI(){
   const opts='<option value="">Main Farm Inventory</option>'+outlets.map(o=>`<option value="${o.id}">${esc(o.name)}</option>`).join('');
-  ['saleOutlet','spoilageOutlet'].forEach(id=>{if($(id)){const cur=$(id).value;$(id).innerHTML=opts;$(id).value=cur&&[...$(id).options].some(x=>x.value===cur)?cur:'';}});
-  if($('outletTransferOutlet'))$('outletTransferOutlet').innerHTML=outlets.map(o=>`<option value="${o.id}">${esc(o.name)}</option>`).join('')||'<option value="">Add an outlet first</option>';
-  if($('outletTransferProduct'))$('outletTransferProduct').innerHTML=products.map(p=>`<option value="${p.id}">${esc(p.name)} — main ${num(p.stock_qty).toFixed(3)} ${esc(p.unit)}</option>`).join('');
-  if($('saleOutlet'))$('saleOutlet').onchange=()=>{const id=$('saleOutlet').value;if(id){const o=outlets.find(x=>String(x.id)===String(id));if(o&&!$('saleCustomer').value) $('saleCustomer').value=o.name;}const current=$('saleProduct')?.value;renderSaleProductOptions(current);$('saleProduct').onchange();updateCreditDiscountUI();};
-  if($('spoilageOutlet'))$('spoilageOutlet').onchange=()=>renderSpoilageLots();
+  ['saleOutlet','spoilageOutlet'].forEach(id=>{
+    if(!$(id))return;
+    const cur=$(id).value;
+    $(id).innerHTML=opts;
+    $(id).value=cur&&[...$(id).options].some(x=>x.value===cur)?cur:'';
+  });
+  if($('outletTransferOutlet')){
+    const cur=$('outletTransferOutlet').value;
+    $('outletTransferOutlet').innerHTML=outlets.map(o=>`<option value="${o.id}">${esc(o.name)}</option>`).join('')||'<option value="">Add an outlet first</option>';
+    if(cur&&[...$('outletTransferOutlet').options].some(x=>x.value===cur))$('outletTransferOutlet').value=cur;
+  }
+  if($('saleOutlet'))$('saleOutlet').onchange=()=>{
+    const id=$('saleOutlet').value;
+    const o=outlets.find(x=>String(x.id)===String(id));
+    if(o&&!$('saleCustomer').value)$('saleCustomer').value=o.name;
+    const current=$('saleProduct')?.value;
+    renderSaleProductOptions(current);
+    $('saleProduct').onchange();
+    updateCreditDiscountUI();
+  };
+  if($('spoilageOutlet'))$('spoilageOutlet').onchange=()=>{
+    const current=$('spoilageProduct')?.value;
+    renderSpoilageProductOptions(current);
+    renderSpoilageLots();
+  };
+  if($('outletTransferOutlet'))$('outletTransferOutlet').onchange=()=>renderOutletTransferProductOptions();
 }
+
 function renderOutletStockTable(){const el=$('outletStockTable');if(!el)return;const rows=outletStock.filter(x=>num(x.qty)>0.000001);el.innerHTML=rows.length?`<div class="tablewrap"><table><thead><tr><th>Outlet</th><th>Product</th><th>Stock</th><th>Inventory Value</th></tr></thead><tbody>${rows.map(x=>`<tr><td>${esc(x.outlet_name)}</td><td>${esc(x.product_name)}</td><td>${num(x.qty).toFixed(3)} ${esc(x.unit)}</td><td>${money(x.value)}</td></tr>`).join('')}</tbody></table></div>`:'<div class="empty">No outlet/display stock has been transferred yet.</div>';}
 async function createOutlet(){const btn=$('outletCreateBtn');btn.disabled=true;try{const name=$('outletNewName').value.trim();if(!name)throw Error('Enter an outlet name.');await api('/outlets',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,address:$('outletNewAddress').value,contact:$('outletNewContact').value})});$('outletNewName').value='';$('outletNewAddress').value='';$('outletNewContact').value='';showToast('Outlet created.');await load();showInvTab('outlet');}catch(e){showToast(e.message,true)}finally{btn.disabled=false}}
 async function transferOutletStock(){try{const outletId=Number($('outletTransferOutlet').value),productId=Number($('outletTransferProduct').value),quantity=Number($('outletTransferQty').value);if(!outletId)throw Error('Select an outlet.');if(!(quantity>0))throw Error('Enter a transfer quantity.');const r=await api('/inventory/outlet-transfer',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({date:$('outletTransferDate').value,outlet_id:outletId,product_id:productId,quantity,reference:$('outletTransferRef').value})});showToast(r.message||'Stock transferred.');$('outletTransferQty').value='';$('outletTransferRef').value='';await load();showInvTab('outlet');}catch(e){showToast(e.message,true)}}
